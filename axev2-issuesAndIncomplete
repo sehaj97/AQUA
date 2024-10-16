@@ -1,0 +1,141 @@
+javascript: (function () {
+    function injectAxeAndRun() {
+        if (typeof axe === 'undefined') {
+            var script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js';
+            script.onload = function () {
+                runAxe();
+            };
+            document.head.appendChild(script);
+        } else {
+            runAxe();
+        }
+    }
+
+    function runAxe() {
+        axe.run(
+            document,
+            {
+                runOnly: {
+                    type: 'tag',
+                    values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+                },
+                resultTypes: ['violations', 'incomplete'],
+                iframes: true,
+                shadowDom: true,
+            },
+            function (error, results) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                displayResults(results.violations, results.incomplete);
+            }
+        );
+    }
+
+    function displayResults(violations, incomplete) {
+        // Create a container for the results
+        var container = document.createElement('div');
+        container.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            width: 50%;
+            height: 80%;
+            background-color: #fff;
+            color: #000;
+            overflow: auto;
+            z-index: 9999;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-family: Arial, sans-serif;
+            border-radius: 8px;
+        `
+        );
+
+        // Violations heading
+        var violationsTitle = document.createElement('h2');
+        violationsTitle.textContent = 'Accessibility Violations';
+        container.appendChild(violationsTitle);
+
+        if (violations.length > 0) {
+            var violationsList = document.createElement('ol');
+
+            // Iterate over violations and display each tag
+            violations.forEach(function (violation) {
+                violation.nodes.forEach(function (node) {
+                    var listItem = document.createElement('li');
+                    listItem.textContent = node.html.trim();
+                    violationsList.appendChild(listItem);
+                });
+            });
+
+            container.appendChild(violationsList);
+        } else {
+            var noViolations = document.createElement('p');
+            noViolations.textContent = 'No accessibility violations found.';
+            container.appendChild(noViolations);
+        }
+
+        // Incomplete heading
+        var incompleteTitle = document.createElement('h2');
+        incompleteTitle.textContent = 'Accessibility Issues Needing Manual Review';
+        container.appendChild(incompleteTitle);
+
+        if (incomplete.length > 0) {
+            var incompleteList = document.createElement('ol');
+
+            // Iterate over incomplete issues and display each tag
+            incomplete.forEach(function (issue) {
+                issue.nodes.forEach(function (node) {
+                    var listItem = document.createElement('li');
+                    listItem.textContent = node.html.trim();
+                    incompleteList.appendChild(listItem);
+                });
+            });
+
+            container.appendChild(incompleteList);
+        } else {
+            var noIncomplete = document.createElement('p');
+            noIncomplete.textContent = 'No accessibility issues needing manual review found.';
+            container.appendChild(noIncomplete);
+        }
+
+        // Close button for the overlay
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Close';
+        closeBtn.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: calc(10% + 10px);
+            right: calc(25% + 10px);
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10000;
+        `
+        );
+        closeBtn.onclick = function () {
+            document.body.removeChild(container);
+            document.body.removeChild(closeBtn);
+        };
+        document.body.appendChild(closeBtn);
+
+        // Append the results container to the body
+        document.body.appendChild(container);
+    }
+
+    // Wait for the page to fully load before running the accessibility checks
+    if (document.readyState === 'complete') {
+        injectAxeAndRun();
+    } else {
+        window.addEventListener('load', injectAxeAndRun);
+    }
+})();

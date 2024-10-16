@@ -1,0 +1,117 @@
+javascript: (function () {
+    function injectAxeAndRun() {
+        if (typeof axe === 'undefined') {
+            var script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js';
+            script.onload = function () {
+                runAxe();
+            };
+            document.head.appendChild(script);
+        } else {
+            runAxe();
+        }
+    }
+
+    function runAxe() {
+        axe.run(
+            document,
+            {
+                runOnly: {
+                    type: 'tag',
+                    values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+                },
+                resultTypes: ['violations'],
+                iframes: true,
+                shadowDom: true,
+            },
+            function (error, results) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                displayViolations(results.violations);
+            }
+        );
+    }
+
+    function displayViolations(violations) {
+        // Create a container for the violations
+        var container = document.createElement('div');
+        container.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            width: 50%;
+            height: 80%;
+            background-color: #fff;
+            color: #000;
+            overflow: auto;
+            z-index: 9999;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-family: Arial, sans-serif;
+            border-radius: 8px;
+        `
+        );
+
+        // Violations heading
+        var title = document.createElement('h2');
+        title.textContent = 'Accessibility Violations';
+        container.appendChild(title);
+
+        if (violations.length > 0) {
+            var list = document.createElement('ol');
+
+            // Iterate over violations and display each tag
+            violations.forEach(function (violation, index) {
+                violation.nodes.forEach(function (node) {
+                    var listItem = document.createElement('li');
+                    listItem.textContent = node.html.trim();
+                    list.appendChild(listItem);
+                });
+            });
+
+            container.appendChild(list);
+        } else {
+            var noViolations = document.createElement('p');
+            noViolations.textContent = 'No accessibility violations found.';
+            container.appendChild(noViolations);
+        }
+
+        // Close button for the overlay
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Close';
+        closeBtn.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: calc(10% + 10px);
+            right: calc(25% + 10px);
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10000;
+        `
+        );
+        closeBtn.onclick = function () {
+            document.body.removeChild(container);
+            document.body.removeChild(closeBtn);
+        };
+        document.body.appendChild(closeBtn);
+
+        // Append the violations container to the body
+        document.body.appendChild(container);
+    }
+
+    // Wait for the page to fully load before running the accessibility checks
+    if (document.readyState === 'complete') {
+        injectAxeAndRun();
+    } else {
+        window.addEventListener('load', injectAxeAndRun);
+    }
+})();

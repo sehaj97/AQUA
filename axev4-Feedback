@@ -1,0 +1,370 @@
+javascript: (function () {
+    function injectAxeAndRun() {
+        if (typeof axe === 'undefined') {
+            var script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js';
+            script.onload = function () {
+                runAxe();
+            };
+            document.head.appendChild(script);
+        } else {
+            runAxe();
+        }
+    }
+
+    function runAxe() {
+        axe.run(
+            document,
+            {
+                runOnly: {
+                    type: 'tag',
+                    values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+                },
+                resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
+                iframes: true,
+                shadowDom: true,
+            },
+            function (error, results) {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+                displayResults(results);
+            }
+        );
+    }
+
+    function displayResults(results) {
+        // Create a container div for the results overlay
+        var container = document.createElement('div');
+        container.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: 10%;
+            left: 25%;
+            width: 50%;
+            height: 80%;
+            background-color: #fff;
+            color: #000;
+            overflow: auto;
+            z-index: 9999;
+            padding: 60px 20px 20px 20px; /* Adjusted for sticky buttons */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-family: Arial, sans-serif;
+            border-radius: 8px;
+        `
+        );
+
+        // Array to keep track of highlighted elements
+        var highlightedElements = [];
+
+        // Function to highlight an element
+        function highlightElement(element) {
+            if (!element) return;
+            // Save the original border style
+            var originalBorder = element.getAttribute('data-original-border');
+            if (originalBorder === null) {
+                originalBorder = element.style.border;
+                element.setAttribute('data-original-border', originalBorder);
+            }
+            // Apply highlight style
+            element.style.border = '5px solid red';
+            // Keep track of highlighted elements
+            if (!highlightedElements.includes(element)) {
+                highlightedElements.push(element);
+            }
+        }
+
+        // Function to remove highlight from an element
+        function removeHighlight(element) {
+            if (!element) return;
+            // Restore the original border style
+            var originalBorder = element.getAttribute('data-original-border');
+            if (originalBorder !== null) {
+                element.style.border = originalBorder;
+                element.removeAttribute('data-original-border');
+            } else {
+                element.style.border = '';
+            }
+            // Remove from highlighted elements
+            var index = highlightedElements.indexOf(element);
+            if (index > -1) {
+                highlightedElements.splice(index, 1);
+            }
+        }
+
+        // Function to remove all highlights
+        function removeAllHighlights() {
+            highlightedElements.forEach(function (element) {
+                removeHighlight(element);
+            });
+            highlightedElements = [];
+        }
+
+        // Create a close button for the overlay
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = 'X';
+        closeBtn.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: calc(10% + 10px);
+            right: calc(25% + 10px);
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10000;
+        `
+        );
+        closeBtn.onmouseover = function () {
+            closeBtn.style.backgroundColor = '#d32f2f';
+        };
+        closeBtn.onmouseout = function () {
+            closeBtn.style.backgroundColor = '#f44336';
+        };
+        closeBtn.onclick = function () {
+            document.body.removeChild(container);
+            document.body.removeChild(closeBtn);
+            document.body.removeChild(highlightAllBtn);
+            document.body.removeChild(removeHighlightsBtn);
+        };
+        document.body.appendChild(closeBtn);
+
+        // Create a button to highlight all violations
+        var highlightAllBtn = document.createElement('button');
+        highlightAllBtn.textContent = 'Highlight All Issues';
+        highlightAllBtn.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: calc(10% + 50px);
+            right: calc(25% + 10px);
+            padding: 5px 10px;
+            background-color: #2196F3;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10000;
+        `
+        );
+        highlightAllBtn.onmouseover = function () {
+            highlightAllBtn.style.backgroundColor = '#1976D2';
+        };
+        highlightAllBtn.onmouseout = function () {
+            highlightAllBtn.style.backgroundColor = '#2196F3';
+        };
+        highlightAllBtn.onclick = function () {
+            // Highlight all violation elements
+            highlightAllViolations(results.violations);
+        };
+        document.body.appendChild(highlightAllBtn);
+
+        // Create a button to remove all highlights
+        var removeHighlightsBtn = document.createElement('button');
+        removeHighlightsBtn.textContent = 'Remove Highlights';
+        removeHighlightsBtn.setAttribute(
+            'style',
+            `
+            position: fixed;
+            top: calc(10% + 90px);
+            right: calc(25% + 10px);
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10000;
+        `
+        );
+        removeHighlightsBtn.onmouseover = function () {
+            removeHighlightsBtn.style.backgroundColor = '#d32f2f';
+        };
+        removeHighlightsBtn.onmouseout = function () {
+            removeHighlightsBtn.style.backgroundColor = '#f44336';
+        };
+        removeHighlightsBtn.onclick = function () {
+            // Remove all highlights
+            removeAllHighlights();
+        };
+        document.body.appendChild(removeHighlightsBtn);
+
+        // Function to highlight all violation elements
+        function highlightAllViolations(violations) {
+            // First, remove any existing highlights
+            removeAllHighlights();
+
+            violations.forEach(function (violation) {
+                violation.nodes.forEach(function (node) {
+                    var targetElement = node.element;
+
+                    // If node.element is not available, try to get it via node.target
+                    if (!targetElement && node.target && node.target.length > 0) {
+                        try {
+                            targetElement = document.querySelector(node.target[0]);
+                        } catch (e) {
+                            console.error('Error querying target element:', e);
+                        }
+                    }
+
+                    if (targetElement) {
+                        highlightElement(targetElement);
+                    }
+                });
+            });
+        }
+
+        // Function to create sections for each result type
+        function createSection(titleText, items, style, type) {
+            var section = document.createElement('div');
+            section.setAttribute('style', style);
+
+            var title = document.createElement('h2');
+            title.textContent = titleText;
+            section.appendChild(title);
+
+            if (items.length > 0) {
+                items.forEach(function (item, index) {
+                    // Create a <details> element for the dropdown
+                    var details = document.createElement('details');
+                    details.setAttribute('style', 'margin-bottom: 10px;');
+
+                    // Create a <summary> element for the clickable title
+                    var summary = document.createElement('summary');
+                    summary.setAttribute('style', 'cursor: pointer; font-weight: bold;');
+                    summary.textContent = (index + 1) + '. ' + item.help;
+                    details.appendChild(summary);
+
+                    // Create a div to hold the user-friendly explanation
+                    var contentDiv = document.createElement('div');
+                    contentDiv.setAttribute('style', 'margin-left: 20px; margin-top: 5px;');
+
+                    // Explanation in simple terms
+                    var explanation = document.createElement('p');
+                    explanation.textContent = getFriendlyExplanation(item, type);
+                    contentDiv.appendChild(explanation);
+
+                    // "Learn More" link
+                    var learnMoreLink = document.createElement('a');
+                    learnMoreLink.href = item.helpUrl;
+                    learnMoreLink.textContent = 'Learn more about this issue';
+                    learnMoreLink.target = '_blank';
+                    learnMoreLink.setAttribute('style', 'display: block; margin-bottom: 10px; color: #2196F3; text-decoration: none;');
+                    contentDiv.appendChild(learnMoreLink);
+
+                    // List of affected nodes
+                    if (item.nodes && item.nodes.length > 0) {
+                        var nodesList = document.createElement('ol');
+                        item.nodes.forEach(function (node) {
+                            var nodeItem = document.createElement('li');
+
+                            // Display node.html in a code block
+                            var codeBlock = document.createElement('code');
+                            codeBlock.textContent = node.html.trim();
+                            codeBlock.setAttribute('style', 'display: block; background-color: #f5f5f5; padding: 5px; border-radius: 3px; margin-bottom: 5px; white-space: pre-wrap;');
+
+                            // Create a link to highlight the element
+                            var highlightLink = document.createElement('a');
+                            highlightLink.href = '#';
+                            highlightLink.textContent = 'Highlight Element on Page';
+                            highlightLink.style.color = '#2196F3';
+                            highlightLink.style.textDecoration = 'none';
+
+                            // Get the element reference
+                            var targetElement = node.element;
+
+                            // If node.element is not available, try to get it via node.target
+                            if (!targetElement && node.target && node.target.length > 0) {
+                                try {
+                                    targetElement = document.querySelector(node.target[0]);
+                                } catch (e) {
+                                    console.error('Error querying target element:', e);
+                                }
+                            }
+
+                            if (targetElement) {
+                                // Event handlers to highlight the element
+                                highlightLink.onmouseover = function () {
+                                    highlightElement(targetElement);
+                                };
+                                highlightLink.onclick = function (e) {
+                                    e.preventDefault();
+                                    // Scroll to the element
+                                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    highlightElement(targetElement);
+                                };
+                            } else {
+                                // Disable the link if the element is not available
+                                highlightLink.style.color = 'gray';
+                                highlightLink.style.cursor = 'default';
+                                highlightLink.onclick = function (e) {
+                                    e.preventDefault();
+                                };
+                            }
+
+                            nodeItem.appendChild(codeBlock);
+                            nodeItem.appendChild(highlightLink);
+                            nodesList.appendChild(nodeItem);
+                        });
+                        contentDiv.appendChild(nodesList);
+                    }
+
+                    // Append the content to the details element
+                    details.appendChild(contentDiv);
+
+                    // Add the details to the section
+                    section.appendChild(details);
+                });
+            } else {
+                var noItems = document.createElement('p');
+                noItems.textContent = 'No issues found in this category.';
+                section.appendChild(noItems);
+            }
+
+            container.appendChild(section);
+        }
+
+        // Function to provide user-friendly explanations
+        function getFriendlyExplanation(item, type) {
+            switch (type) {
+                case 'violations':
+                    return 'Issue: ' + item.description + ' This needs to be fixed to improve accessibility.';
+                case 'passes':
+                    return 'Good job! This element meets accessibility standards.';
+                case 'incomplete':
+                    return 'This item requires manual review to determine if there is an accessibility issue.';
+                case 'inapplicable':
+                    return 'No action needed. This rule does not apply to the current content.';
+                default:
+                    return '';
+            }
+        }
+
+        // Display Violations
+        createSection('Accessibility Issues to Fix:', results.violations, 'margin-bottom: 30px;', 'violations');
+
+        // Display Passes
+        createSection('Accessible Elements (No Action Needed):', results.passes, 'margin-bottom: 30px;', 'passes');
+
+        // Display Incomplete
+        createSection('Items Needing Manual Review:', results.incomplete, 'margin-bottom: 30px;', 'incomplete');
+
+        // Display Inapplicable
+        createSection('Not Applicable:', results.inapplicable, 'margin-bottom: 30px;', 'inapplicable');
+
+        // Append the results container to the body
+        document.body.appendChild(container);
+    }
+
+    // Wait for the page to fully load before running the accessibility checks
+    if (document.readyState === 'complete') {
+        injectAxeAndRun();
+    } else {
+        window.addEventListener('load', injectAxeAndRun);
+    }
+})();
