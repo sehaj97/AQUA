@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axe Accessibility Checker</title>
+    <title>Accessibility Reports</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             padding: 20px;
             color: #333;
@@ -23,7 +23,7 @@
 
         textarea {
             width: 100%;
-            height: 120px;
+            height: 100px;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
@@ -55,8 +55,24 @@
             color: #0056b3;
         }
 
-        #results {
+        #results,
+        #stats {
             margin-top: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grid-item {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
         }
 
         details {
@@ -91,10 +107,6 @@
             color: red;
         }
 
-        .warning {
-            color: orange;
-        }
-
         .violation {
             color: #d9534f;
         }
@@ -116,6 +128,8 @@
     <textarea id="urlInput" placeholder="Enter URLs here, one per line"></textarea>
     <button id="checkButton">Check Accessibility</button>
     <div id="loader">Checking accessibility... <span id="timer">0</span> seconds elapsed</div>
+
+    <div id="stats" class="grid"></div>
     <div id="results"></div>
 
     <script>
@@ -124,6 +138,8 @@
             const resultsDiv = document.getElementById('results');
             const loader = document.getElementById('loader');
             const timerSpan = document.getElementById('timer');
+            const statsDiv = document.getElementById('stats');
+            let errorUrls = [];  // To store URLs with errors
 
             if (urls.length === 0) {
                 alert('Please enter at least one URL');
@@ -131,6 +147,7 @@
             }
 
             resultsDiv.innerHTML = '';
+            statsDiv.innerHTML = '';
             loader.style.display = 'block';
 
             let secondsElapsed = 0;
@@ -154,68 +171,117 @@
                         return;
                     }
 
+                    let issues = 0, noIssues = 0, errors = 0;
+                    errorUrls = []; // Reset error URLs
+
+                    const sortResults = {
+                        noIssues: [],
+                        issues: [],
+                        errors: []
+                    };
+
                     data.results.forEach(result => {
-                        const dropdown = document.createElement('details');
-                        const summary = document.createElement('summary');
-                        summary.className = 'summary-heading';
-
-                        const icon = document.createElement('span');
-                        icon.classList.add('icon');
-
                         if (result.error) {
-                            icon.textContent = '⚠️';
-                            icon.classList.add('warning');
-                            summary.appendChild(icon);
-                            summary.append(`${result.url} (Error)`);
+                            errors++;
+                            sortResults.errors.push(result);
+                            errorUrls.push(result.url);
                         } else if (result.violations.length === 0) {
-                            icon.textContent = '✔️';
-                            icon.classList.add('success');
-                            summary.appendChild(icon);
-                            summary.append(`${result.url} (No Issues)`);
+                            noIssues++;
+                            sortResults.noIssues.push(result);
                         } else {
-                            icon.textContent = '❌';
-                            icon.classList.add('error');
-                            summary.appendChild(icon);
-                            summary.append(`${result.url} (${result.violations.length} Issues)`);
+                            issues++;
+                            sortResults.issues.push(result);
                         }
-
-                        dropdown.appendChild(summary);
-
-                        if (result.error) {
-                            const errorText = document.createElement('p');
-                            errorText.className = 'error';
-                            errorText.textContent = `Error: ${result.error}`;
-                            dropdown.appendChild(errorText);
-                        } else if (result.violations.length > 0) {
-                            const violationList = document.createElement('ol');
-                            result.violations.forEach(violation => {
-                                const li = document.createElement('li');
-                                const description = document.createElement('p');
-                                description.textContent = `${violation.description} (Impact: ${violation.impact})`;
-                                description.classList.add('violation');
-                                li.appendChild(description);
-
-                                const codeList = document.createElement('ul');
-                                violation.nodes.forEach(node => {
-                                    const nodeItem = document.createElement('li');
-                                    const elementHtml = document.createElement('code');
-                                    elementHtml.textContent = node.html.trim();
-                                    nodeItem.appendChild(elementHtml);
-                                    codeList.appendChild(nodeItem);
-                                });
-                                li.appendChild(codeList);
-                                violationList.appendChild(li);
-                            });
-                            dropdown.appendChild(violationList);
-                        } else {
-                            const noIssuesText = document.createElement('p');
-                            noIssuesText.className = 'success';
-                            noIssuesText.textContent = 'No accessibility violations found.';
-                            dropdown.appendChild(noIssuesText);
-                        }
-
-                        resultsDiv.appendChild(dropdown);
                     });
+
+                    statsDiv.innerHTML = `
+                        <div class="grid-item">Total URLs Scanned: ${urls.length}</div>
+                        <div class="grid-item">URLs with No Issues: ${noIssues}</div>
+                        <div class="grid-item">URLs with Issues: ${issues}</div>
+                        <div class="grid-item">URLs with Errors: ${errors}</div>
+                    `;
+
+                    // Render each category in sorted order
+                    ['issues', 'noIssues', 'errors'].forEach(category => {
+                        const categoryDiv = document.createElement('details');
+                        categoryDiv.className = 'result-category';
+                        categoryDiv.innerHTML = `<summary>${category === 'issues' ? 'URLs with Issues' : category === 'noIssues' ? 'URLs with No Issues' : 'URLs with Errors'} (${sortResults[category].length})</summary>`;
+
+                        sortResults[category].forEach(result => {
+                            const resultItem = document.createElement('details');
+                            const summary = document.createElement('summary');
+                            const icon = document.createElement('span');
+                            icon.classList.add('icon');
+
+                            if (result.error) {
+                                icon.textContent = '⚠️';
+                                icon.classList.add('error');
+                                summary.appendChild(icon);
+                                summary.append(`${result.url} (Error)`);
+                            } else if (result.violations.length === 0) {
+                                icon.textContent = '✔️';
+                                icon.classList.add('success');
+                                summary.appendChild(icon);
+                                summary.append(`${result.url} (No Issues)`);
+                            } else {
+                                icon.textContent = '❌';
+                                icon.classList.add('violation');
+                                summary.appendChild(icon);
+                                summary.append(`${result.url} (${result.violations.length} Issues)`);
+                            }
+
+                            resultItem.appendChild(summary);
+
+                            if (result.error) {
+                                const errorText = document.createElement('p');
+                                errorText.className = 'error';
+                                errorText.textContent = `Error: ${result.error}`;
+                                resultItem.appendChild(errorText);
+                            } else if (result.violations.length > 0) {
+                                const violationList = document.createElement('ol');
+                                result.violations.forEach(violation => {
+                                    const li = document.createElement('li');
+                                    const description = document.createElement('p');
+                                    description.textContent = `${violation.description} (Impact: ${violation.impact})`;
+                                    description.classList.add('violation');
+                                    li.appendChild(description);
+
+                                    const codeList = document.createElement('ul');
+                                    violation.nodes.forEach(node => {
+                                        const nodeItem = document.createElement('li');
+                                        const elementHtml = document.createElement('code');
+                                        elementHtml.textContent = node.html.trim();
+                                        nodeItem.appendChild(elementHtml);
+                                        codeList.appendChild(nodeItem);
+                                    });
+                                    li.appendChild(codeList);
+                                    violationList.appendChild(li);
+                                });
+                                resultItem.appendChild(violationList);
+                            } else {
+                                const noIssuesText = document.createElement('p');
+                                noIssuesText.className = 'success';
+                                noIssuesText.textContent = 'No accessibility violations found.';
+                                resultItem.appendChild(noIssuesText);
+                            }
+
+                            categoryDiv.appendChild(resultItem);
+                        });
+
+                        resultsDiv.appendChild(categoryDiv);
+                    });
+
+                    // Button to re-run analysis for URLs with errors
+                    if (errorUrls.length > 0) {
+                        const rerunButton = document.createElement('button');
+                        rerunButton.textContent = 'Re-run Analysis for URLs with Errors';
+                        rerunButton.style.marginTop = '15px';
+                        rerunButton.onclick = function () {
+                            document.getElementById('urlInput').value = errorUrls.join('\n');
+                            document.getElementById('checkButton').click();
+                        };
+                        resultsDiv.appendChild(rerunButton);
+                    }
                 })
                 .catch(err => {
                     clearInterval(timer);
