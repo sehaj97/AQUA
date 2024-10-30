@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axe Accessibility Checker</title>
+    <style>
+        /* (Your existing CSS styles) */
+
+        #loader {
+            display: none;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Axe Accessibility Checker 2</h1>
+    <p>Enter multiple URLs (one per line) and click "Check Accessibility" to view accessibility violations:</p>
+    <textarea id="urlInput" placeholder="Enter URLs here, one per line"></textarea>
+    <button id="checkButton">Check Accessibility</button>
+    <div id="loader">Running accessibility checks... Processed: <span id="processedCount">0</span></div>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('checkButton').addEventListener('click', function () {
+            const urls = document.getElementById('urlInput').value.trim().split('\n').map(url => url.trim()).filter(url => url);
+            const resultsDiv = document.getElementById('results');
+            const loader = document.getElementById('loader');
+            const processedCountElement = document.getElementById('processedCount');
+
+            if (urls.length === 0) {
+                alert('Please enter at least one URL');
+                return;
+            }
+
+            resultsDiv.innerHTML = '';
+            loader.style.display = 'block';
+            processedCountElement.textContent = '0';
+            let processedCount = 0;
+
+            fetch('/analyze-multiple', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loader.style.display = 'none';
+
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p class="error-text">Error: ${data.error}</p>`;
+                        return;
+                    }
+
+                    const { noIssues, withIssues, errors, totalProcessed } = data;
+
+                    // Display processed count
+                    processedCountElement.textContent = totalProcessed;
+
+                    // Function to display grouped results
+                    function displayGroup(title, items, className) {
+                        const section = document.createElement('section');
+                        const heading = document.createElement('h2');
+                        heading.textContent = `${title} (${items.length})`;
+                        heading.className = className;
+                        section.appendChild(heading);
+
+                        items.forEach(result => {
+                            const item = document.createElement('div');
+                            item.className = 'result-item';
+
+                            const url = document.createElement('p');
+                            url.textContent = result.url;
+                            item.appendChild(url);
+
+                            if (result.error) {
+                                const errorText = document.createElement('p');
+                                errorText.className = 'error-text';
+                                errorText.textContent = `Error: ${result.error}`;
+                                item.appendChild(errorText);
+                            } else if (result.violations && result.violations.length > 0) {
+                                const violationHeading = document.createElement('h3');
+                                violationHeading.textContent = 'Accessibility Violations:';
+                                item.appendChild(violationHeading);
+
+                                const ol = document.createElement('ol');
+                                result.violations.forEach(violation => {
+                                    const li = document.createElement('li');
+                                    li.textContent = `${violation.description} (Impact: ${violation.impact})`;
+                                    ol.appendChild(li);
+                                });
+                                item.appendChild(ol);
+                            }
+
+                            section.appendChild(item);
+                        });
+
+                        resultsDiv.appendChild(section);
+                    }
+
+                    // Display results by group
+                    displayGroup('No Issues', noIssues, 'success-text');
+                    displayGroup('With Issues', withIssues, 'error-text');
+                    displayGroup('Errors', errors, 'warning-text');
+                })
+                .catch(err => {
+                    loader.style.display = 'none';
+                    resultsDiv.innerHTML = `<p class="error-text">Error: ${err.message}</p>`;
+                });
+        });
+    </script>
+</body>
+
+</html>

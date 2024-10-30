@@ -1,14 +1,39 @@
 import express, { json } from 'express';
 import puppeteer from 'puppeteer-extra';
 import { AxePuppeteer } from '@axe-core/puppeteer';
-import { join } from 'path';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 puppeteer.use(StealthPlugin());
 
 const app = express();
 app.use(json());
 app.use(express.static('.'));
+
+// Get directory name for static file serving in ES modules
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Utility function to sanitize and validate URLs
+function cleanUrl(url) {
+    // Trim whitespace and remove URL parameters and fragments
+    url = url.trim().split(/[?#]/)[0];
+
+    // Ensure URL starts with http/https and contains "www"
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
+    if (!url.includes('www.')) {
+        url = url.replace(/https?:\/\//, '$&www.');
+    }
+
+    // Ensure URL ends with "/"
+    if (!url.endsWith('/')) {
+        url += '/';
+    }
+
+    return url;
+}
 
 // Function to analyze a single URL
 async function analyzeUrl(url) {
@@ -26,21 +51,16 @@ async function analyzeUrl(url) {
         });
 
         const page = await browser.newPage();
-
         await page.setUserAgent(
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
             'AppleWebKit/537.36 (KHTML, like Gecko) ' +
             'Chrome/114.0.5735.198 Safari/537.36'
         );
 
-        await page.setExtraHTTPHeaders({
-            'Accept-Language': 'en-US,en;q=0.9',
-        });
-
+        await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
 
         const results = await new AxePuppeteer(page).analyze();
-
         await browser.close();
 
         return { url, violations: results.violations };
@@ -52,21 +72,43 @@ async function analyzeUrl(url) {
 
 // Endpoint to handle multiple URLs for accessibility analysis
 app.post('/analyze-multiple', async (req, res) => {
-    const urls = req.body.urls;
+    let { urls } = req.body;
 
     if (!Array.isArray(urls) || urls.length === 0) {
         res.json({ error: 'No URLs provided or invalid format.' });
         return;
     }
 
-    try {
-        // Analyze all URLs asynchronously
-        const results = await Promise.all(urls.map(analyzeUrl));
-        res.json({ results });
-    } catch (error) {
-        console.error('Error during analysis:', error);
-        res.json({ error: 'An error occurred during the analysis.' });
+    // Clean and validate URLs
+    urls = urls.map(cleanUrl);
+
+    const noIssues = [];
+    const withIssues = [];
+    const errors = [];
+
+    for (const url of urls) {
+        const result = await analyzeUrl(url);
+        if (result.error) {
+            errors.push(result);
+        } else if (result.violations.length === 0) {
+            noIssues.push(result);
+        } else {
+            withIssues.push(result);
+        }
     }
+
+    // Send the grouped results
+    res.json({
+        noIssues,
+        withIssues,
+        errors,
+        totalProcessed: urls.length,
+    });
+});
+
+// Root route to serve index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index2.html'));
 });
 
 // Start the server
