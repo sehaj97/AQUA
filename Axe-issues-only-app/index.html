@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axe Accessibility Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            color: #fff;
+            background-color: #0056b3;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #003d80;
+        }
+
+        #loader {
+            display: none;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #0056b3;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        details {
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        details[open] {
+            background-color: #f1f1f1;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .warning {
+            color: orange;
+        }
+
+        .violation {
+            color: #d9534f;
+        }
+
+        code {
+            display: block;
+            background-color: #f1f1f1;
+            padding: 5px;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Axe Accessibility Checker</h1>
+    <p>Enter multiple URLs below (one per line) and click "Check Accessibility" to view the results:</p>
+    <textarea id="urlInput" placeholder="Enter URLs here, one per line"></textarea>
+    <button id="checkButton">Check Accessibility</button>
+    <div id="loader">Checking accessibility... <span id="timer">0</span> seconds elapsed</div>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('checkButton').addEventListener('click', function () {
+            const urls = document.getElementById('urlInput').value.trim().split('\n').map(url => url.trim()).filter(url => url);
+            const resultsDiv = document.getElementById('results');
+            const loader = document.getElementById('loader');
+            const timerSpan = document.getElementById('timer');
+
+            if (urls.length === 0) {
+                alert('Please enter at least one URL');
+                return;
+            }
+
+            resultsDiv.innerHTML = '';
+            loader.style.display = 'block';
+
+            let secondsElapsed = 0;
+            const timer = setInterval(() => {
+                secondsElapsed++;
+                timerSpan.textContent = secondsElapsed;
+            }, 1000);
+
+            fetch('/analyze-multiple', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ urls })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(timer);
+                    loader.style.display = 'none';
+
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+                        return;
+                    }
+
+                    data.results.forEach(result => {
+                        const dropdown = document.createElement('details');
+                        const summary = document.createElement('summary');
+                        summary.className = 'summary-heading';
+
+                        const icon = document.createElement('span');
+                        icon.classList.add('icon');
+
+                        if (result.error) {
+                            icon.textContent = '⚠️';
+                            icon.classList.add('warning');
+                            summary.appendChild(icon);
+                            summary.append(`${result.url} (Error)`);
+                        } else if (result.violations.length === 0) {
+                            icon.textContent = '✔️';
+                            icon.classList.add('success');
+                            summary.appendChild(icon);
+                            summary.append(`${result.url} (No Issues)`);
+                        } else {
+                            icon.textContent = '❌';
+                            icon.classList.add('error');
+                            summary.appendChild(icon);
+                            summary.append(`${result.url} (${result.violations.length} Issues)`);
+                        }
+
+                        dropdown.appendChild(summary);
+
+                        if (result.error) {
+                            const errorText = document.createElement('p');
+                            errorText.className = 'error';
+                            errorText.textContent = `Error: ${result.error}`;
+                            dropdown.appendChild(errorText);
+                        } else if (result.violations.length > 0) {
+                            const violationList = document.createElement('ol');
+                            result.violations.forEach(violation => {
+                                const li = document.createElement('li');
+                                const description = document.createElement('p');
+                                description.textContent = `${violation.description} (Impact: ${violation.impact})`;
+                                description.classList.add('violation');
+                                li.appendChild(description);
+
+                                const codeList = document.createElement('ul');
+                                violation.nodes.forEach(node => {
+                                    const nodeItem = document.createElement('li');
+                                    const elementHtml = document.createElement('code');
+                                    elementHtml.textContent = node.html.trim();
+                                    nodeItem.appendChild(elementHtml);
+                                    codeList.appendChild(nodeItem);
+                                });
+                                li.appendChild(codeList);
+                                violationList.appendChild(li);
+                            });
+                            dropdown.appendChild(violationList);
+                        } else {
+                            const noIssuesText = document.createElement('p');
+                            noIssuesText.className = 'success';
+                            noIssuesText.textContent = 'No accessibility violations found.';
+                            dropdown.appendChild(noIssuesText);
+                        }
+
+                        resultsDiv.appendChild(dropdown);
+                    });
+                })
+                .catch(err => {
+                    clearInterval(timer);
+                    loader.style.display = 'none';
+                    resultsDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+                });
+        });
+    </script>
+</body>
+
+</html>

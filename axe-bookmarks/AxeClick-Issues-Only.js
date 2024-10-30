@@ -17,14 +17,15 @@ javascript: (function () {
             z-index: 9999;
         `
         );
-        loader.id = 'axeLoader';
+        loader.id = `axeLoader-${Math.random().toString(36).substr(2, 9)}`; // Random ID
+        loader.setAttribute('aria-hidden', 'true'); // Hide from assistive tech
         loader.textContent = 'Running accessibility checks...';
         document.body.appendChild(loader);
     }
 
     // Function to hide the loader when results are ready
     function hideLoader() {
-        var loader = document.getElementById('axeLoader');
+        var loader = document.querySelector('[id^="axeLoader"]');
         if (loader) {
             loader.remove();
         }
@@ -52,10 +53,10 @@ javascript: (function () {
                     type: 'tag',
                     values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
                 },
-                resultTypes: ['violations', 'passes', 'incomplete', 'inapplicable'],
+                resultTypes: ['violations', 'incomplete'],
                 iframes: true,
                 shadowDom: true,
-                exclude: [['#axeLoader']] // Exclude the loader element from analysis
+                exclude: [['[id^="axeLoader"]']], // Use prefix selector to ignore all loaders
             },
             function (error, results) {
                 hideLoader(); // Hide loader after results are ready
@@ -261,12 +262,8 @@ javascript: (function () {
             switch (type) {
                 case 'violations':
                     return 'Issue: ' + item.description + ' This needs to be fixed to improve accessibility.';
-                case 'passes':
-                    return 'Good job! This element meets accessibility standards.';
                 case 'incomplete':
                     return 'This item requires manual review to determine if there is an accessibility issue.';
-                case 'inapplicable':
-                    return 'No action needed. This rule does not apply to the current content.';
                 default:
                     return '';
             }
@@ -274,16 +271,8 @@ javascript: (function () {
 
         // Display Violations
         createSection('Accessibility Issues to Fix:', results.violations, 'violations');
-
         // Display Incomplete
         createSection('Accessibility Issues Needing Manual Review:', results.incomplete, 'incomplete');
-
-        // Display Passes
-        createSection('Accessible Elements (No Action Needed):', results.passes, 'passes');
-
-        // Display Inapplicable
-        createSection('More Suggestions on adding accessibility (Not a standard):', results.inapplicable, 'inapplicable');
-
         // Append the results container to the body
         document.body.appendChild(container);
     }
