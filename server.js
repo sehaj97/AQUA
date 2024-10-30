@@ -1,7 +1,5 @@
 import express, { json } from 'express';
 import puppeteer from 'puppeteer-extra';
-import { AxePuppeteer } from '@axe-core/puppeteer';
-import { join } from 'path';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 puppeteer.use(StealthPlugin());
@@ -44,13 +42,13 @@ async function analyzeUrl(url) {
             }
         });
         await page.goto(url, { waitUntil: 'load', timeout: 600000 });
+
         // Inject the axe-core CDN script
         await page.addScriptTag({
             url: 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.4.1/axe.min.js'
         });
-        const memoryBefore = await page.metrics();
-        console.log("Memory usage before Axe:", memoryBefore);
         const results = await page.evaluate(async () => {
+
             // Ensure axe is available in the page context
             if (!window.axe) throw new Error('axe-core not found on the page');
 
@@ -65,9 +63,6 @@ async function analyzeUrl(url) {
                 shadowDom: false,
             });
         });
-
-        const memoryAfter = await page.metrics();
-        console.log("Memory usage after Axe:", memoryAfter);
         await browser.close();
         return { url, violations: results.violations };
     } catch (error) {
