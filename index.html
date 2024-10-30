@@ -8,48 +8,38 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 10px;
-            max-width: 100%;
+            max-width: 600px;
             margin: 0 auto;
+            padding: 20px;
             color: #333;
         }
 
         h1 {
-            font-size: 1.8em;
-            margin-bottom: 10px;
             text-align: center;
             color: #0056b3;
-        }
-
-        p {
-            font-size: 1em;
-            line-height: 1.4;
-            text-align: center;
-            margin-bottom: 20px;
+            font-size: 1.8em;
+            margin-bottom: 10px;
         }
 
         textarea {
             width: 100%;
-            max-width: 100%;
             height: 120px;
-            padding: 12px;
-            font-size: 1em;
-            border: 1px solid #ccc;
+            padding: 10px;
             border-radius: 5px;
+            border: 1px solid #ccc;
             margin-bottom: 15px;
-            box-sizing: border-box;
             resize: vertical;
         }
 
         button {
             width: 100%;
             padding: 12px;
-            font-size: 1em;
             color: #fff;
             background-color: #0056b3;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1em;
             transition: background-color 0.3s ease;
         }
 
@@ -59,9 +49,9 @@
 
         #loader {
             display: none;
-            margin-top: 15px;
-            font-weight: bold;
             text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
             color: #0056b3;
         }
 
@@ -69,48 +59,11 @@
             margin-top: 20px;
         }
 
-        .result-item {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
-            background-color: #f9f9f9;
-        }
-
-        .dropdown-heading {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            background-color: #e7e7e7;
-            border-radius: 5px;
-            margin-bottom: 5px;
-        }
-
-        .dropdown-heading span.icon {
-            margin-right: 10px;
-            font-size: 1.2em;
-        }
-
-        .success-icon {
-            color: green;
-        }
-
-        .error-icon {
-            color: red;
-        }
-
-        .warning-icon {
-            color: orange;
-        }
-
         details {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border: 1px solid #ddd;
-            padding: 10px;
             border-radius: 5px;
+            padding: 10px;
             background-color: #f9f9f9;
         }
 
@@ -118,44 +71,59 @@
             background-color: #f1f1f1;
         }
 
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        .success {
+            color: green;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .warning {
+            color: orange;
+        }
+
+        .violation {
+            color: #d9534f;
+        }
+
         code {
             display: block;
             background-color: #f1f1f1;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-wrap: break-word;
-            font-size: 0.9em;
+            padding: 5px;
+            border-radius: 3px;
             margin-top: 5px;
-        }
-
-        #loader {
-            display: none;
-            margin-top: 15px;
-            font-weight: bold;
-            text-align: center;
-            color: #0056b3;
+            overflow-wrap: break-word;
         }
     </style>
 </head>
 
 <body>
     <h1>Axe Accessibility Checker</h1>
-    <p>Enter multiple URLs (one per line) and click "Check Accessibility" to view accessibility violations:</p>
+    <p>Enter multiple URLs below (one per line) and click "Check Accessibility" to view the results:</p>
     <textarea id="urlInput" placeholder="Enter URLs here, one per line"></textarea>
     <button id="checkButton">Check Accessibility</button>
-    <!-- <div id="loader">Running accessibility checks... Please wait.</div>
-    <div id="results"></div> -->
-    <div id="loader">Running accessibility checks... Elapsed time: <span id="timer">0</span> seconds.</div>
+    <div id="loader">Checking accessibility... <span id="timer">0</span> seconds elapsed</div>
     <div id="results"></div>
 
     <script>
-        let timerInterval;
-
         document.getElementById('checkButton').addEventListener('click', function () {
             const urls = document.getElementById('urlInput').value.trim().split('\n').map(url => url.trim()).filter(url => url);
             const resultsDiv = document.getElementById('results');
             const loader = document.getElementById('loader');
-            const timerElement = document.getElementById('timer');
+            const timerSpan = document.getElementById('timer');
 
             if (urls.length === 0) {
                 alert('Please enter at least one URL');
@@ -164,13 +132,11 @@
 
             resultsDiv.innerHTML = '';
             loader.style.display = 'block';
-            timerElement.textContent = '0';
-            let elapsedTime = 0;
 
-            // Start timer
-            timerInterval = setInterval(() => {
-                elapsedTime += 1;
-                timerElement.textContent = elapsedTime;
+            let secondsElapsed = 0;
+            const timer = setInterval(() => {
+                secondsElapsed++;
+                timerSpan.textContent = secondsElapsed;
             }, 1000);
 
             fetch('/analyze-multiple', {
@@ -180,203 +146,84 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    clearInterval(timerInterval); // Stop the timer
+                    clearInterval(timer);
                     loader.style.display = 'none';
 
                     if (data.error) {
-                        resultsDiv.innerHTML = `<p class="error-text">Error: ${data.error}</p>`;
+                        resultsDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
                         return;
                     }
 
-                    const results = data.results;
-                    results.forEach(result => {
+                    data.results.forEach(result => {
                         const dropdown = document.createElement('details');
-                        const dropdownSummary = document.createElement('summary');
-                        dropdownSummary.className = 'dropdown-heading';
+                        const summary = document.createElement('summary');
+                        summary.className = 'summary-heading';
 
                         const icon = document.createElement('span');
                         icon.classList.add('icon');
 
-                        // Determine icon based on result
                         if (result.error) {
-                            icon.classList.add('warning-icon');
                             icon.textContent = '⚠️';
-                            dropdownSummary.appendChild(icon);
-                            dropdownSummary.append(` ${result.url} (Error)`);
+                            icon.classList.add('warning');
+                            summary.appendChild(icon);
+                            summary.append(`${result.url} (Error)`);
                         } else if (result.violations.length === 0) {
-                            icon.classList.add('success-icon');
                             icon.textContent = '✔️';
-                            dropdownSummary.appendChild(icon);
-                            dropdownSummary.append(` ${result.url} (No Issues)`);
+                            icon.classList.add('success');
+                            summary.appendChild(icon);
+                            summary.append(`${result.url} (No Issues)`);
                         } else {
-                            icon.classList.add('error-icon');
                             icon.textContent = '❌';
-                            dropdownSummary.appendChild(icon);
-                            dropdownSummary.append(` ${result.url} (${result.violations.length} Issues)`);
+                            icon.classList.add('error');
+                            summary.appendChild(icon);
+                            summary.append(`${result.url} (${result.violations.length} Issues)`);
                         }
 
-                        dropdown.appendChild(dropdownSummary);
+                        dropdown.appendChild(summary);
 
-                        const content = document.createElement('div');
-
-                        // Display errors
                         if (result.error) {
                             const errorText = document.createElement('p');
-                            errorText.className = 'error-text';
+                            errorText.className = 'error';
                             errorText.textContent = `Error: ${result.error}`;
-                            content.appendChild(errorText);
+                            dropdown.appendChild(errorText);
                         } else if (result.violations.length > 0) {
-                            const violationHeading = document.createElement('h3');
-                            violationHeading.textContent = 'Accessibility Violations:';
-                            content.appendChild(violationHeading);
-
-                            const ol = document.createElement('ol');
+                            const violationList = document.createElement('ol');
                             result.violations.forEach(violation => {
                                 const li = document.createElement('li');
                                 const description = document.createElement('p');
                                 description.textContent = `${violation.description} (Impact: ${violation.impact})`;
+                                description.classList.add('violation');
                                 li.appendChild(description);
 
-                                const tagsList = document.createElement('ul');
+                                const codeList = document.createElement('ul');
                                 violation.nodes.forEach(node => {
                                     const nodeItem = document.createElement('li');
                                     const elementHtml = document.createElement('code');
                                     elementHtml.textContent = node.html.trim();
                                     nodeItem.appendChild(elementHtml);
-                                    tagsList.appendChild(nodeItem);
+                                    codeList.appendChild(nodeItem);
                                 });
-
-                                li.appendChild(tagsList);
-                                ol.appendChild(li);
+                                li.appendChild(codeList);
+                                violationList.appendChild(li);
                             });
-                            content.appendChild(ol);
+                            dropdown.appendChild(violationList);
                         } else {
                             const noIssuesText = document.createElement('p');
-                            noIssuesText.className = 'success-text';
+                            noIssuesText.className = 'success';
                             noIssuesText.textContent = 'No accessibility violations found.';
-                            content.appendChild(noIssuesText);
+                            dropdown.appendChild(noIssuesText);
                         }
 
-                        dropdown.appendChild(content);
                         resultsDiv.appendChild(dropdown);
                     });
                 })
                 .catch(err => {
-                    clearInterval(timerInterval); // Stop the timer
+                    clearInterval(timer);
                     loader.style.display = 'none';
-                    resultsDiv.innerHTML = `<p class="error-text">Error: ${err.message}</p>`;
+                    resultsDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
                 });
         });
     </script>
-    <!-- <script>
-        document.getElementById('checkButton').addEventListener('click', function () {
-            const urls = document.getElementById('urlInput').value.trim().split('\n').map(url => url.trim()).filter(url => url);
-            const resultsDiv = document.getElementById('results');
-            const loader = document.getElementById('loader');
-
-            if (urls.length === 0) {
-                alert('Please enter at least one URL');
-                return;
-            }
-
-            resultsDiv.innerHTML = '';
-            loader.style.display = 'block';
-
-            fetch('/analyze-multiple', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ urls })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    loader.style.display = 'none';
-
-                    if (data.error) {
-                        resultsDiv.innerHTML = `<p class="error-text">Error: ${data.error}</p>`;
-                        return;
-                    }
-
-                    const results = data.results;
-                    results.forEach(result => {
-                        const dropdown = document.createElement('details');
-                        const dropdownSummary = document.createElement('summary');
-                        dropdownSummary.className = 'dropdown-heading';
-
-                        const icon = document.createElement('span');
-                        icon.classList.add('icon');
-
-                        // Determine icon based on result
-                        if (result.error) {
-                            icon.classList.add('warning-icon');
-                            icon.textContent = '⚠️';
-                            dropdownSummary.appendChild(icon);
-                            dropdownSummary.append(` ${result.url} (Error)`);
-                        } else if (result.violations.length === 0) {
-                            icon.classList.add('success-icon');
-                            icon.textContent = '✔️';
-                            dropdownSummary.appendChild(icon);
-                            dropdownSummary.append(` ${result.url} (No Issues)`);
-                        } else {
-                            icon.classList.add('error-icon');
-                            icon.textContent = '❌';
-                            dropdownSummary.appendChild(icon);
-                            dropdownSummary.append(` ${result.url} (${result.violations.length} Issues)`);
-                        }
-
-                        dropdown.appendChild(dropdownSummary);
-
-                        const content = document.createElement('div');
-
-                        // Display errors
-                        if (result.error) {
-                            const errorText = document.createElement('p');
-                            errorText.className = 'error-text';
-                            errorText.textContent = `Error: ${result.error}`;
-                            content.appendChild(errorText);
-                        } else if (result.violations.length > 0) {
-                            // List of violations if any
-                            const violationHeading = document.createElement('h3');
-                            violationHeading.textContent = 'Accessibility Violations:';
-                            content.appendChild(violationHeading);
-
-                            const ol = document.createElement('ol');
-                            result.violations.forEach(violation => {
-                                const li = document.createElement('li');
-                                const description = document.createElement('p');
-                                description.textContent = `${violation.description} (Impact: ${violation.impact})`;
-                                li.appendChild(description);
-
-                                const tagsList = document.createElement('ul');
-                                violation.nodes.forEach(node => {
-                                    const nodeItem = document.createElement('li');
-                                    const elementHtml = document.createElement('code');
-                                    elementHtml.textContent = node.html.trim();
-                                    nodeItem.appendChild(elementHtml);
-                                    tagsList.appendChild(nodeItem);
-                                });
-
-                                li.appendChild(tagsList);
-                                ol.appendChild(li);
-                            });
-                            content.appendChild(ol);
-                        } else {
-                            // No violations
-                            const noIssuesText = document.createElement('p');
-                            noIssuesText.className = 'success-text';
-                            noIssuesText.textContent = 'No accessibility violations found.';
-                            content.appendChild(noIssuesText);
-                        }
-
-                        dropdown.appendChild(content);
-                        resultsDiv.appendChild(dropdown);
-                    });
-                })
-                .catch(err => {
-                    loader.style.display = 'none';
-                    resultsDiv.innerHTML = `<p class="error-text">Error: ${err.message}</p>`;
-                });
-        });
-    </script> -->
 </body>
 
 </html>

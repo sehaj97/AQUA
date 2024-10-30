@@ -24,25 +24,68 @@ async function analyzeUrl(url) {
                 '--disable-dev-shm-usage',
             ],
         });
-
+        console.log('1')
         const page = await browser.newPage();
 
+        console.log('2')
         await page.setUserAgent(
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
             'AppleWebKit/537.36 (KHTML, like Gecko) ' +
             'Chrome/114.0.5735.198 Safari/537.36'
         );
 
+        console.log('3')
         await page.setExtraHTTPHeaders({
             'Accept-Language': 'en-US,en;q=0.9',
         });
 
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 120000 });
 
-        const results = await new AxePuppeteer(page).analyze();
+        console.log('4')
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            const resourceType = request.resourceType();
+            if (['image', 'media', 'stylesheet', 'font'].includes(resourceType)) {
+                request.abort(); // Block these resources
+            } else {
+                request.continue();
+            }
+        });
 
+        console.log('5')
+        await page.goto(url, { waitUntil: 'load', timeout: 600000 });
+
+        console.log('6')
+        // Inject the axe-core CDN script
+        await page.addScriptTag({
+            url: 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.4.1/axe.min.js'
+        });
+        const memoryBefore = await page.metrics();
+        console.log("Memory usage before Axe:", memoryBefore);
+        const results = await page.evaluate(async () => {
+            // Ensure axe is available in the page context
+            if (!window.axe) throw new Error('axe-core not found on the page');
+
+            // Run axe analysis with specific rules and options (customize as needed)
+            return await window.axe.run({
+                runOnly: {
+                    type: 'tag',
+                    values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+                },
+                resultTypes: ['violations'],
+                iframes: false,
+                shadowDom: false,
+            });
+        });
+
+        const memoryAfter = await page.metrics();
+        console.log("Memory usage after Axe:", memoryAfter);
+
+
+
+        console.log('7')
         await browser.close();
 
+        console.log('8')
         return { url, violations: results.violations };
     } catch (error) {
         console.error(`Error during analysis of ${url}:`, error);
