@@ -1,1 +1,1 @@
-# Accessibility Report Generator
+# Accessibility Report Generator (ARG)
