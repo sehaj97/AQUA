@@ -45,7 +45,7 @@ The application will start on `http://localhost:3000` by default.
    - URLs with No Issues
    - URLs with Errors
 4. **Re-run Analysis**: If some URLs encountered errors, a "Re-run Analysis" button will allow users to re-test only those URLs.
-5. **Print Report**: Click "Expand All & Print" to open all dropdowns and prepare the page for printing.
+5. **Print Report**: Click "Print Report" to open all dropdowns and prepare the page for printing.
 
 ---
 
