@@ -68,6 +68,14 @@
             margin-bottom: 20px;
         }
 
+        .grid-button-item {
+            background-color: skyblue;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
         .grid-item {
             background-color: #f1f1f1;
             padding: 15px;
@@ -137,7 +145,13 @@
     <p>Enter multiple URLs below (one per line) and click "Check Accessibility" to view the results:</p>
     <textarea id="urlInput" placeholder="Enter URLs here, one per line"></textarea>
     <button id="checkButton">Generate Report</button>
-    <button id="expandAndPrintButton" style="display: none;">Print Report</button>
+    <div class="grid">
+        <button id="ViewFullReport" style="display: none;" class="grid-button-item">View Full Report</button>
+        <button id="ViewMiniReport" style="display: none;" class="grid-button-item">View Mini Report</button>
+        <button id="PrintFullReport" style="display: none;" class="grid-button-item">Print Full Report</button>
+        <button id="PrintMiniReport" style="display: none;" class="grid-button-item">Print Mini Report</button>
+
+    </div>
     <div id="loader">Checking accessibility... <span id="timer">0</span> seconds elapsed</div>
 
     <div id="stats" class="grid"></div>
@@ -151,7 +165,10 @@
             const loader = document.getElementById('loader');
             const timerSpan = document.getElementById('timer');
             const statsDiv = document.getElementById('stats');
-            const expandAndPrintButton = document.getElementById('expandAndPrintButton');
+            const ViewFullReport = document.getElementById('ViewFullReport');
+            const ViewMiniReport = document.getElementById('ViewMiniReport');
+            const PrintFullReport = document.getElementById('PrintFullReport');
+            const PrintMiniReport = document.getElementById('PrintMiniReport');
 
             let errorUrls = [];  // To store URLs with errors
 
@@ -163,7 +180,10 @@
             resultsDiv.innerHTML = '';
             statsDiv.innerHTML = '';
             loader.style.display = 'block';
-            expandAndPrintButton.style.display = 'none';
+            ViewFullReport.style.display = 'none';
+            ViewMiniReport.style.display = 'none';
+            PrintFullReport.style.display = 'none';
+            PrintMiniReport.style.display = 'none';
 
             let secondsElapsed = 0;
             const timer = setInterval(() => {
@@ -228,6 +248,7 @@
                             const summary = document.createElement('summary');
                             const icon = document.createElement('span');
                             icon.classList.add('dropdown-icon');
+                            resultItem.className = `results-item`;
 
                             if (result.error) {
                                 icon.textContent = '⚠️';
@@ -292,7 +313,10 @@
 
                         resultsDiv.appendChild(categoryDiv);
                     });
-                    expandAndPrintButton.style.display = 'block';
+                    ViewFullReport.style.display = 'block';
+                    ViewMiniReport.style.display = 'block';
+                    PrintFullReport.style.display = 'block';
+                    PrintMiniReport.style.display = 'block';
                     // Button to re-run analysis for URLs with errors
                     if (errorUrls.length > 0) {
                         const rerunButton = document.createElement('button');
@@ -311,8 +335,29 @@
                     resultsDiv.innerHTML = `<p class="error">Error: ${err.message}</p>`;
                 });
         });
-        document.getElementById('expandAndPrintButton').addEventListener('click', function () {
+        document.getElementById('ViewFullReport').addEventListener('click', function () {
             document.querySelectorAll('details').forEach(detail => detail.open = true);
+            const textarea = document.getElementById('urlInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        });
+        document.getElementById('ViewMiniReport').addEventListener('click', function () {
+            document.querySelectorAll('details').forEach(detail => detail.open = false);
+            document.querySelectorAll('.result-category').forEach(detail => detail.open = true);
+            const textarea = document.getElementById('urlInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        });
+        document.getElementById('PrintFullReport').addEventListener('click', function () {
+            document.querySelectorAll('details').forEach(detail => detail.open = true);
+            const textarea = document.getElementById('urlInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+            window.print();
+        });
+        document.getElementById('PrintMiniReport').addEventListener('click', function () {
+            document.querySelectorAll('details').forEach(detail => detail.open = false);
+            document.querySelectorAll('.result-category').forEach(detail => detail.open = true);
             const textarea = document.getElementById('urlInput');
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
