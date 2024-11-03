@@ -2,6 +2,9 @@ import express, { json } from 'express';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
 puppeteer.use(StealthPlugin());
 
 const app = express();
@@ -89,6 +92,11 @@ app.post('/analyze-multiple', async (req, res) => {
         res.json({ error: 'An error occurred during the analysis.' });
     }
 });
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + "/index.html");
+})
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;
