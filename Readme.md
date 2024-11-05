@@ -1,33 +1,47 @@
 # Accessibility Report Generator (ARG)
 
-The Accessibility Report Generator (ARG) is a tool that allows users to check the accessibility of multiple URLs by generating detailed reports, including issues found on each page. It displays results in an organized, easy-to-read format with interactive dropdowns for individual URLs, and provides options to re-run tests for URLs that encountered errors.
+The Accessibility Report Generator (ARG) is an accessibility testing tool that analyzes multiple URLs for compliance with WCAG standards and best practices. ARG provides comprehensive accessibility reports, with features designed for developers, testers, and content creators to identify and address accessibility issues. The tool leverages **Axe Core v4.4.1** for server-side testing to prevent recursion depth issues and **Axe Core v4.10.0** for client-side bookmarklets, ensuring broad compatibility and performance optimization.
 
 ## Table of Contents
 
+- [Overview](#overview)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Features](#features)
 - [Configuration](#configuration)
+- [Bookmarks](#bookmarks)
 - [Contributing](#contributing)
+
+---
+
+## Overview
+
+ARG provides accessibility reports for URLs in an organized format with interactive dropdowns for each URL. The tool includes retry functionality for error-prone URLs and print-friendly views of reports.
+
+### Versions and Compatibility
+
+- **Axe Core v4.4.1** for `server.js`: This version prevents stack overflow errors on larger or more complex pages, which were encountered with v4.10.0.
+- **Axe Core v4.10.0** for Bookmarklets: The latest version supports robust rule sets for more comprehensive page-level analysis.
 
 ---
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the repository**:
 
    ```bash
-   git clone <repository-url>
-   cd <repository-name>
+   git clone https://github.com/sehaj97/ARG.git
+   cd ARG
    ```
 
-2. Install dependencies:
+2. **Install dependencies**:
 
    ```bash
    npm install
    ```
 
-3. Run the application:
+3. **Run the application**:
+
    ```bash
    npm start
    ```
@@ -40,33 +54,47 @@ The application will start on `http://localhost:3000` by default.
 
 1. **Enter URLs**: Add multiple URLs in the textarea, one per line.
 2. **Generate Report**: Click "Generate Report" to analyze the URLs for accessibility issues.
-3. **View Results**: Results are displayed in categories with dropdowns for:
-   - URLs with Issues
-   - URLs with No Issues
-   - URLs with Errors
-4. **Re-run Analysis**: If some URLs encountered errors, a "Re-run Analysis" button will allow users to re-test only those URLs.
-5. **Print Report**: Click "Print Report" to open all dropdowns and prepare the page for printing.
+3. **View Results**:
+   - Organized in categories: URLs with Issues, URLs with No Issues, and URLs with Errors.
+   - Interactive dropdowns and links for each URL.
+4. **Re-run Analysis**: Retry only the URLs that encountered errors.
+5. **Print Report**: Click "Print Report" to expand all dropdowns and format the page for printing.
 
 ---
 
 ## Features
 
-- **Interactive URL Testing**: Tests each URL independently, displaying results with icons and dropdowns.
-- **Timer**: Shows the total time elapsed during the test.
-- **Result Sorting**: Categorizes results by issues, no issues, and errors.
-- **Retry Option**: Allows re-testing for URLs that encountered errors.
-- **Expandable Textarea**: Automatically resizes with content when the "Generate Report" button is clicked.
-- **Print Feature**: Opens all dropdowns and generates a print-ready format for reports.
+- **URL Analysis with Timer**: Tracks the time taken to analyze all URLs.
+- **Error Handling and Retry**: Re-run analysis for URLs that encountered errors.
+- **Dynamic Textarea Resizing**: Expands based on input.
+- **Print-Ready Report**: Expands dropdowns and prepares a print-friendly view.
+- **Grid Summary and Dropdowns**: Organizes results with icons and counts for easy viewing.
 
 ---
 
 ## Configuration
 
-- **Server Port**: By default, the server runs on port `3000`. Change it by setting the environment variable:
+- **Server Port**: Default is `3000`. Change by setting the environment variable:
+
   ```bash
   PORT=your_port_number
   ```
-- **Testing URLs**: Send URLs to `/analyze-multiple` endpoint in a POST request with a JSON payload containing an array of URLs.
+
+- **API Endpoint**:
+  - Use `/analyze-multiple` for testing via API by sending a POST request with an array of URLs.
+
+---
+
+## Bookmarks
+
+The `ARG-Bookmarks` folder contains two bookmarklet files, each with a minified version:
+
+1. **ARG-issues-only.js**: Runs Axe Core v4.10.0 to detect and highlight only issues on the page.
+2. **ARG-fullreport.js**: Runs a full Axe Core v4.10.0 analysis, categorizing results as Violations, Passes, Incomplete, and Inapplicable items.
+
+**How to Use**:
+
+- Drag the bookmarklet files to the bookmarks bar to run accessibility checks on any web page.
 
 ---
 
@@ -78,18 +106,13 @@ The application will start on `http://localhost:3000` by default.
 4. Push to the branch (`git push origin feature/YourFeature`).
 5. Open a pull request.
 
-Please ensure your code adheres to the repository's style guidelines.
-
 ---
 
 ### Developer Notes
 
-- The main file is `index.html`, which uses JavaScript to call the `/analyze-multiple` API endpoint.
-- The `checkButton` triggers the main accessibility testing workflow, sorting and displaying results by URL.
-- Results are organized with categories (`issues`, `noIssues`, `errors`) and formatted for readability.
-- You can expand the `textarea` dynamically only when needed, as defined in the JavaScript.
-- The "Print Report" feature expands all dropdowns and initiates `window.print()` for a print-friendly view.
+- **server.js**: The core server-side testing logic uses **Axe Core v4.4.1** to avoid stack overflow issues with larger pages, ensuring stable and efficient testing.
+- **index.html**: The front-end UI, providing the main workflow for generating accessibility reports.
+- **Expandable Textarea**: Auto-resizes on report generation for optimal UX.
+- **Grid Summary**: Displays URL analysis counts and elapsed time.
 
-For any issues, please reach out to the repository maintainers (That's me, Sehaj)
-
----
+For any issues, please reach out to the repository maintainers.

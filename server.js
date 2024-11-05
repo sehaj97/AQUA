@@ -1,7 +1,10 @@
 import express, { json } from 'express';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 puppeteer.use(StealthPlugin());
 
 const app = express();
@@ -71,6 +74,25 @@ async function analyzeUrl(url) {
     }
 }
 
+// Split URLs into smaller chunks
+function chunkArray(array, chunkSize) {
+    const results = [];
+    while (array.length) {
+        results.push(array.splice(0, chunkSize));
+    }
+    return results;
+}
+
+async function analyzeMultipleUrls(urls) {
+    const urlChunks = chunkArray(urls, 5); // Adjust chunk size as needed
+    const results = [];
+    for (const chunk of urlChunks) {
+        const chunkResults = await Promise.all(chunk.map(analyzeUrl));
+        results.push(...chunkResults);
+    }
+    return results;
+}
+
 // Endpoint to handle multiple URLs for accessibility analysis
 app.post('/analyze-multiple', async (req, res) => {
     const urls = req.body.urls;
@@ -82,13 +104,18 @@ app.post('/analyze-multiple', async (req, res) => {
 
     try {
         // Analyze all URLs asynchronously
-        const results = await Promise.all(urls.map(analyzeUrl));
+        const results = await analyzeMultipleUrls(urls);
         res.json({ results });
     } catch (error) {
         console.error('Error during analysis:', error);
         res.json({ error: 'An error occurred during the analysis.' });
     }
 });
+
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, "index.html"));
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;
