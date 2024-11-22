@@ -75,6 +75,7 @@ javascript: (function () {
         }
     
         #aria-label-popup .close-button {
+            position: absolute !important;
             top: 12px !important;
             right: 12px !important;
             background: linear-gradient(135deg, #ff4d4d, #cc0000) !important;
@@ -148,6 +149,12 @@ javascript: (function () {
         .inline-aria-label:hover {
             background: #0056b3 !important;
         }
+
+        #aria-label-popup h3 {
+            margin: 0 0 16px !important;
+            font-size: 20px !important;
+            color: #007bff !important;
+        }
     `;
 
 
@@ -159,6 +166,7 @@ javascript: (function () {
     popupElement.id = 'aria-label-popup';
     popupElement.innerHTML = `
       <button class="close-button" id="close-popup">&times;</button>
+        <h3>ARIA Label Tester - ALT</h3>
         <button id="highlight-and-inline-labels">Highlight and on Hover Show Aria-labels</button>
         <button id="always-show-inline-labels">Highlight and Show ALL aria-labels</button>
         <button id="always-show-inline-labels-2">Show ALL aria-labels</button>
@@ -370,26 +378,27 @@ javascript: (function () {
     // Button: Always Show Inline Labels
     document.getElementById('always-show-inline-labels-2').onclick = function () {
         disableAllButtonsExceptRemove();
-        const elementsWithAriaLabel = document.querySelectorAll('[aria-label]');
+        const elementsWithAriaLabel = document.querySelectorAll("[aria-label]");
         elementsWithAriaLabel.forEach((element) => {
-            if (!element.querySelector('.inline-aria-label')) {
-                const inlineLabel = document.createElement('span');
-                inlineLabel.className = 'inline-aria-label';
-                inlineLabel.textContent = element.getAttribute('aria-label');
+            if (!element.classList.contains("aria-label-highlight")) {
+                element.classList.add("aria-label-highlight");
+                const ariaLabel = element.getAttribute("aria-label");
+                const inlineLabel = document.createElement("span");
+                inlineLabel.className = "aria-label-inline";
+                inlineLabel.textContent = ariaLabel;
                 element.appendChild(inlineLabel);
             }
         });
-        const inlineStylesheetId = 'always-inline-label-style';
-        if (!document.getElementById(inlineStylesheetId)) {
-            const inlineStylesheet = document.createElement('style');
-            inlineStylesheet.id = inlineStylesheetId;
-            inlineStylesheet.textContent = `
-                .inline-aria-label {
-                    display: inline-block !important;
-                }
-            `;
-            document.head.appendChild(inlineStylesheet);
-        }
-        console.log('Inline labels are now always visible.');
+        console.log(`${elementsWithAriaLabel.length} elements were highlighted and labeled.`);
+    };
+
+    highlightOnlyButton.onclick = function () {
+        const elementsWithAriaLabel = document.querySelectorAll("[aria-label]");
+        elementsWithAriaLabel.forEach((element) => {
+            if (!element.classList.contains("aria-label-highlight")) {
+                element.classList.add("aria-label-highlight");
+            }
+        });
+        console.log(`${elementsWithAriaLabel.length} elements were highlighted.`);
     };
 })();

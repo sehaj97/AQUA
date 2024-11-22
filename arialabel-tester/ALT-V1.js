@@ -121,10 +121,9 @@ javascript: (function () {
     popupElement.id = "aria-label-popup";
     popupElement.innerHTML = `
         <button class="close-btn">&times;</button>
-        <h3>ARIA Label Tools</h3>
-        <button id="highlight-and-inline">Highlight + Inline Labels</button>
+        <h3>ARIA Label Tools - ALT Version 1</h3>
         <button id="highlight-only">Highlight Only</button>
-        <button id="remove-highlights">Remove Highlights</button>
+        <button id="highlight-and-inline">Highlight + Inline Labels</button>
     `;
     document.body.appendChild(popupElement);
 
@@ -138,7 +137,6 @@ javascript: (function () {
     // Button actions
     const highlightAndInlineButton = document.getElementById("highlight-and-inline");
     const highlightOnlyButton = document.getElementById("highlight-only");
-    const removeHighlightsButton = document.getElementById("remove-highlights");
 
     highlightAndInlineButton.onclick = function () {
         const elementsWithAriaLabel = document.querySelectorAll("[aria-label]");
@@ -163,11 +161,5 @@ javascript: (function () {
             }
         });
         console.log(`${elementsWithAriaLabel.length} elements were highlighted.`);
-    };
-
-    removeHighlightsButton.onclick = function () {
-        const highlightedElements = document.querySelectorAll(".aria-label-highlight, .aria-label-inline");
-        highlightedElements.forEach((element) => element.remove());
-        console.log("Highlights and inline labels removed.");
     };
 })();
