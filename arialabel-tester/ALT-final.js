@@ -111,31 +111,34 @@ javascript: (function () {
         }
     
         .aria-label-tooltip {
-            position: absolute !important;
-            top: -35px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            background: #444 !important;
-            color: #fff !important;
-            padding: 8px 12px !important;
-            border-radius: 6px !important;
-            font-size: 12px !important;
-            white-space: nowrap !important;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-            z-index: 10000 !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            transition: all 0.3s ease-in-out !important;
-        }
-    
-        .highlighted-aria-label:hover .aria-label-tooltip {
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
+    position: absolute !important;
+    top: -35px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: #444 !important;
+    color: #fff !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    z-index: 100000 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.3s ease-in-out !important;
+    max-width: 300px !important; /* Optional: limit tooltip width */
+    overflow-wrap: break-word !important; /* Handle long text gracefully */
+}
+
+.highlighted-aria-label:hover .aria-label-tooltip {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
     
         .inline-aria-label {
-            display: inline-block !important;
-            background: #007bff !important;
+            display: inline-block !important; 
+            background: #ff8800 !important;
             color: #fff !important;
             padding: 6px 10px !important;
             border-radius: 12px !important;
@@ -144,6 +147,7 @@ javascript: (function () {
             margin-left: 6px !important;
             z-index: 10000 !important;
             transition: background 0.3s ease-in-out !important;
+            position: relative !important;
         }
     
         .inline-aria-label:hover {
@@ -167,9 +171,9 @@ javascript: (function () {
     popupElement.innerHTML = `
       <button class="close-button" id="close-popup">&times;</button>
         <h3>ARIA Label Tester - ALT</h3>
-        <button id="highlight-and-inline-labels">Highlight and on Hover Show Aria-labels</button>
-        <button id="always-show-inline-labels">Highlight and Show ALL aria-labels</button>
-        <button id="always-show-inline-labels-2">Show ALL aria-labels</button>
+        <button id="highlight-and-inline-labels">Highlight and View Aria-labels in Tooltips</button>
+        <button id="always-show-inline-labels">View ALL tooltips for arialabel elements</button>
+        <button id="always-show-inline-labels-2">View ALL arialabels inline</button>
         <button id="remove-actions">Remove Actions</button>
     `;
     document.body.appendChild(popupElement);
@@ -267,7 +271,7 @@ javascript: (function () {
                 inlineStylesheet.textContent = `
                     .inline-aria-label {
                         display: none !important;
-                        position: absolute !important;
+                        position: relative !important;
                         background: #333 !important;
                         color: #fff !important;
                         padding: 4px 8px !important;
@@ -345,7 +349,7 @@ javascript: (function () {
             inlineStylesheet.textContent = `
                 .inline-aria-label {
                     display: block !important;
-                    position: absolute !important;
+                    position: relative !important;
                     background: #333 !important;
                     color: #fff !important;
                     padding: 4px 8px !important;
@@ -375,30 +379,60 @@ javascript: (function () {
 
     };
 
+
     // Button: Always Show Inline Labels
     document.getElementById('always-show-inline-labels-2').onclick = function () {
         disableAllButtonsExceptRemove();
-        const elementsWithAriaLabel = document.querySelectorAll("[aria-label]");
+        // Highlight elements with aria-label
+        (function () {
+            const highlightedElements = document.querySelectorAll('.highlighted-aria-label');
+            if (highlightedElements.length > 0) {
+                highlightedElements.forEach((element) => element.remove());
+                console.log('Removed existing highlights.');
+                return;
+            }
+            const highlightStylesheetId = 'highlight-aria-label-style';
+            if (!document.getElementById(highlightStylesheetId)) {
+                const highlightStylesheet = document.createElement('style');
+                highlightStylesheet.id = highlightStylesheetId;
+                highlightStylesheet.textContent = `
+                    .highlighted-aria-label {
+                        position: relative !important;
+                        outline: 2px solid #ff8800 !important;
+                        background-color: rgba(255, 200, 0, 0.2) !important;
+                        cursor: pointer !important;
+                    }
+                `;
+                document.head.appendChild(highlightStylesheet);
+            }
+            const elementsWithAriaLabel = document.querySelectorAll('[aria-label]');
+            elementsWithAriaLabel.forEach((element) => {
+                if (element.classList.contains('highlighted-aria-label')) return;
+                element.classList.add('highlighted-aria-label');
+            });
+            console.log(`${elementsWithAriaLabel.length} elements with aria-label were highlighted.`);
+        })();
+        const elementsWithAriaLabel = document.querySelectorAll('[aria-label]');
         elementsWithAriaLabel.forEach((element) => {
-            if (!element.classList.contains("aria-label-highlight")) {
-                element.classList.add("aria-label-highlight");
-                const ariaLabel = element.getAttribute("aria-label");
-                const inlineLabel = document.createElement("span");
-                inlineLabel.className = "aria-label-inline";
-                inlineLabel.textContent = ariaLabel;
+            if (!element.querySelector('.inline-aria-label')) {
+                const inlineLabel = document.createElement('span');
+                inlineLabel.className = 'inline-aria-label';
+                inlineLabel.textContent = element.getAttribute('aria-label');
                 element.appendChild(inlineLabel);
             }
         });
-        console.log(`${elementsWithAriaLabel.length} elements were highlighted and labeled.`);
+        const inlineStylesheetId = 'always-inline-label-style';
+        if (!document.getElementById(inlineStylesheetId)) {
+            const inlineStylesheet = document.createElement('style');
+            inlineStylesheet.id = inlineStylesheetId;
+            inlineStylesheet.textContent = `
+                .inline-aria-label {
+                    display: inline-block !important;
+                }
+            `;
+            document.head.appendChild(inlineStylesheet);
+        }
+        console.log('Inline labels are now always visible.');
     };
 
-    highlightOnlyButton.onclick = function () {
-        const elementsWithAriaLabel = document.querySelectorAll("[aria-label]");
-        elementsWithAriaLabel.forEach((element) => {
-            if (!element.classList.contains("aria-label-highlight")) {
-                element.classList.add("aria-label-highlight");
-            }
-        });
-        console.log(`${elementsWithAriaLabel.length} elements were highlighted.`);
-    };
 })();
