@@ -159,6 +159,8 @@ javascript: (function () {
     popupElement.id = 'aria-label-popup';
     popupElement.innerHTML = `
       <button class="close-button" id="close-popup">&times;</button>
+
+        <h3>ARIA Label Tester - ALT</h3>
         <button id="highlight-and-inline-labels">Highlight and on Hover Show Aria-labels</button>
         <button id="always-show-inline-labels">Highlight and Show ALL aria-labels</button>
         <button id="always-show-inline-labels-2">Show ALL aria-labels</button>
