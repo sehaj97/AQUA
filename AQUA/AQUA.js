@@ -10,6 +10,7 @@ javascript: (function () {
     // Inject styles for the popup and highlights
     const popupStylesheetId = 'aqua-popup-style';
     if (!document.getElementById(popupStylesheetId)) {
+
         const popupStylesheet = document.createElement('style');
         popupStylesheet.id = popupStylesheetId;
         popupStylesheet.textContent = `
@@ -18,22 +19,22 @@ javascript: (function () {
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            background: linear-gradient(135deg, #ffffff, #f3f3f3) !important;
-            color: #333 !important;
-            padding: 16px 24px !important;
-            border: 1px solid #ddd !important;
-            border-radius: 16px !important;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+            background: linear-gradient(135deg, #1d1d1d, #333) !important;
+            color: #ffffff !important;
+            padding: 20px !important;
+            border: 1px solid #444 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6) !important;
             z-index: 10000 !important;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-            width: 400px !important;
-            max-height: 80vh !important; /* Restrict height */
+            font-family: 'Roboto', Arial, sans-serif !important;
+            width: 360px !important;
+            max-height: 75vh !important; /* Restrict height */
             overflow-y: auto !important; /* Scrollable content */
             text-align: center !important;
-            animation: fadeIn 0.4s ease-in-out !important;
+            animation: slideIn 0.3s ease-out !important;
         }
-        
-        @keyframes fadeIn {
+    
+        @keyframes slideIn {
             from {
                 opacity: 0;
                 transform: translate(-50%, -55%);
@@ -43,78 +44,104 @@ javascript: (function () {
                 transform: translate(-50%, -50%);
             }
         }
-
-        #aqua-popup button {
-            display: inline-block !important;
-            margin: 8px 4px !important;
-            padding: 8px 16px !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            color: #fff !important;
-            background: linear-gradient(135deg, #007bff, #0056b3) !important;
-            border: none !important;
-            border-radius: 16px !important;
-            cursor: pointer !important;
-            text-align: center !important;
-            transition: all 0.3s ease !important;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        #aqua-popup button:hover {
-            background: linear-gradient(135deg, #0056b3, #004099) !important;
-            transform: scale(1.05) !important;
-        }
-
-        #aqua-popup button:disabled {
-            background: #c0c0c0 !important;
-            cursor: not-allowed !important;
-            box-shadow: none !important;
-        }
-
-        #aqua-popup .close-button {
-            position: absolute !important;
-            top: 8px !important;
-            right: 8px !important;
-            background: #ff4d4d !important;
-            color: #fff !important;
-            border: none !important;
-            border-radius: 50% !important;
-            font-size: 16px !important;
-            width: 24px !important;
-            height: 24px !important;
-            cursor: pointer !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
-
-        #aqua-popup .close-button:hover {
-            background: #cc0000 !important;
-        }
-
+    
         #aqua-popup h3 {
-            margin: 8px 0 12px !important;
-            font-size: 18px !important;
-            color: #007bff !important;
+            font-size: 20px !important;
+            margin: 2px !important;
+            color: #00c2ff !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
         }
-
+    
         #aqua-popup p {
             font-size: 14px !important;
-            margin-bottom: 12px !important;
-            line-height: 1.4 !important;
+            margin: 0 !important;
+            color: #bbb !important;
+            line-height: 1.5 !important;
         }
-
+    
         #aqua-popup ul {
+            margin: 12px 0 !important;
+            padding: 0 !important;
+            list-style: none !important;
             text-align: left !important;
-            margin: 0 0 16px !important;
-            padding: 0 16px !important;
-            list-style: disc !important;
+        }
+    
+        #aqua-popup ul li {
+            font-size: 13px !important;
+            color: #ddd !important;
+            margin-bottom: 6px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+    
+        #aqua-popup ul li::before {
+            content: '•';
+            color: #00c2ff !important;
+            margin-right: 8px !important;
+        }
+    
+        #aqua-popup button {
+           display: block !important;
+    width: 90% !important;
+    margin: 5px !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    color: #fff !important;
+    background: linear-gradient(135deg, #00c2ff, #007bff) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: background 0.3s ease !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+    
+        #aqua-popup button:hover {
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        }
+    
+        #aqua-popup button:disabled {
+            background: #555 !important;
+            cursor: not-allowed !important;
+        }
+    
+        #aqua-popup .close-button {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    background: #ff4d4d !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 50% !important;
+    font-size: 16px !important;
+    width: 15px !important;
+    height: 15px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.3s ease !important;
+    z-index: 10001 !important; /* Ensure it stays on top */
+}
+
+#aqua-popup .close-button:hover {
+    background: #cc0000 !important;
+}
+
+        #button-container {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+            margin: 2px 0 !important;
+        }
+    
+        #button-container button {
+            flex: 1 !important;
+            max-width: 100% !important;
+            text-align: center !important;
         }
 
-        #aqua-popup ul li {
-            margin-bottom: 8px !important;
-            font-size: 14px !important;
-        }
     
         .highlighted-aria-label {
             position: relative !important;
@@ -172,24 +199,9 @@ javascript: (function () {
         .inline-aria-label:hover {
             background: #0056b3 !important;
         }
-#button-container {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 8px !important; /* Space between buttons */
-    margin-top: 16px !important;
-}
-
-#button-container button {
-    flex: 1 1 auto !important; /* Make buttons flexible */
-    max-width: 180px !important; /* Optional: Limit button width */
-    text-align: center !important;
-}
-
     `;
-
-
         document.head.appendChild(popupStylesheet);
+
     }
 
     // Create popup
@@ -204,16 +216,17 @@ javascript: (function () {
     <ul>
         <li><strong>ALT</strong> - Test aria-label attributes.</li>
         <li><strong>ARG</strong> - Run axe accessibility checks.</li>
-        <li><strong>IT</strong> - Check image formats and fallbacks.</li>
+        <li><strong>IT</strong> - Check images alt tags, formats and fallbacks.</li>
+        <li><strong>FORMALT</strong> - check for forms alt, aria labels and aria labeledby.</li>
     </ul>
 </p>
 <h3>ALT</h3>
 <div id="button-container">
-    <button id="highlight-and-inline-labels">Highlight Aria-labels and view on hover</button>
-    <button id="always-show-inline-labels">Show Tooltips</button>
-    <button id="always-show-inline-labels-2">Inline Labels</button>
-<button id="highlight-and-inline-labels-skip">Highlight Aria-labels (Skip Header/Footer)</button>
-<button id="always-show-inline-labels-skip">Show Tooltips (Skip Header/Footer)</button>
+<button id="highlight-and-inline-labels-skip">Highlight Aria-labels with tooltips on hover (Skip Header/Footer)</button>
+<button id="always-show-inline-labels-skip">Show All Labels Always (Skip Header/Footer)</button>
+    <button id="highlight-and-inline-labels">Highlight Aria-labels with tooltips on hover</button>
+    <button id="always-show-inline-labels">Show Tooltips Always</button>
+    <button id="always-show-inline-labels-2">Show All Labels Always</button>
 </div>
 <h3>ARG</h3>
 <div id="button-container">
@@ -221,23 +234,32 @@ javascript: (function () {
 </div>
 <h3>IT</h3>
 <div id="button-container">
-    <button id="inline-image-labels">Check Image Formats</button>
+    <button id="show-alt-text-skip">Check Image Alt Text (Skip Header/Footer)</button>
     <button id="inline-image-labels-skip">Check Image Formats (Skip Header/Footer)</button>
     <button id="show-alt-text">Check Image Alt Text</button>
-    <button id="show-alt-text-skip">Check Image Alt Text (Skip Header/Footer)</button>
+    <button id="inline-image-labels">Check Image Formats</button>
 </div>
+<h3>FORMALT</h3>
 <div id="button-container">
-    <button id="remove-actions">Reset Highlights</button>
+    <button id="form-aria-checker">form aria checks</button>
+</div>
+<h3>Reset</h3>
+<div id="button-container">
+    <button id="remove-actions">Refresh to use other functions</button>
 </div>
 `;
 
     document.body.appendChild(popupElement);
 
     // Close button functionality
-    document.querySelector('.close-button').onclick = function () {
-        popupElement.remove();
-        console.log('Popup closed.');
-    };
+    document.getElementById('close-popup').addEventListener('click', function () {
+        const popup = document.getElementById('aqua-popup');
+        if (popup) {
+            popup.remove();
+            console.log('Popup closed.');
+        }
+    });
+
     // Function to disable all buttons except "Remove Actions" and "Close Popup"
     const disableAllButtonsExceptRemove = () => {
         const buttons = popupElement.querySelectorAll('button');
@@ -248,36 +270,9 @@ javascript: (function () {
         });
     };
 
-    // Function to enable all buttons
-    const enableAllButtons = () => {
-        const buttons = popupElement.querySelectorAll('button');
-        buttons.forEach((button) => {
-            button.disabled = false;
-        });
-    };
-
-    // Add Remove Actions button functionality
     document.getElementById('remove-actions').onclick = function () {
-        enableAllButtons();
-        // Remove all highlights
-        document.querySelectorAll('.highlighted-aria-label').forEach((element) => {
-            element.classList.remove('highlighted-aria-label');
-        });
-        // Remove inline labels
-        document.querySelectorAll('.inline-aria-label').forEach((label) => label.remove());
-        // Remove inline label containers
-        document.querySelectorAll('.inline-label-container').forEach((container) => {
-            const element = container.firstChild;
-            container.replaceWith(element);
-        });
-        // Remove stylesheets added by the script
-        ['highlight-aria-label-style', 'inline-aria-label-style', 'always-inline-label-style', 'highlight-image-style', 'inline-image-style'].forEach((id) => {
-            const stylesheet = document.getElementById(id);
-            if (stylesheet) stylesheet.remove();
-        });
-        console.log('All actions have been removed.');
+        location.reload();
     };
-
 
     // ALT Button: highlight and tooltip
     document.getElementById('highlight-and-inline-labels').onclick = function () {
@@ -785,7 +780,7 @@ javascript: (function () {
         }
     };
 
-    // IT Button: Inline Labels for Images
+    // IT Button: Inline Labels for Images format checks
     document.getElementById('inline-image-labels').onclick = function () {
         disableAllButtonsExceptRemove();
 
@@ -821,7 +816,8 @@ javascript: (function () {
             }
 
             // Find images and picture elements
-            const images = document.querySelectorAll('img, picture');
+            const images = document.querySelectorAll('img, picture, svg');
+
             images.forEach((image) => {
                 if (image.querySelector('.inline-image-label')) return;
 
@@ -850,29 +846,177 @@ javascript: (function () {
         })();
     };
 
-    // IT Button:  show alt texts
-    document.getElementById('show-alt-text').onclick = function () {
+    // Highlight Aria-labels (Skip Header/Footer)
+    document.getElementById('highlight-and-inline-labels-skip').onclick = function () {
         disableAllButtonsExceptRemove();
 
-        // Add alt text labels
+        // Highlight elements with aria-label
         (function () {
-            // Remove existing alt text labels if present
-            const altLabels = document.querySelectorAll('.alt-text-label');
-            if (altLabels.length > 0) {
-                altLabels.forEach((label) => label.remove());
-                console.log('Removed existing alt text labels.');
+            const highlightedElements = document.querySelectorAll('.highlighted-aria-label');
+            if (highlightedElements.length > 0) {
+                highlightedElements.forEach((element) => element.classList.remove('highlighted-aria-label'));
+                console.log('Removed existing highlights.');
                 return;
             }
 
-            // Add alt text styles if not already present
-            const altTextStylesheetId = 'alt-text-style';
-            if (!document.getElementById(altTextStylesheetId)) {
-                const altTextStylesheet = document.createElement('style');
-                altTextStylesheet.id = altTextStylesheetId;
-                altTextStylesheet.textContent = `
-                    .alt-text-label {
+            const highlightStylesheetId = 'highlight-aria-label-style';
+            if (!document.getElementById(highlightStylesheetId)) {
+                const highlightStylesheet = document.createElement('style');
+                highlightStylesheet.id = highlightStylesheetId;
+                highlightStylesheet.textContent = `
+                .highlighted-aria-label {
+                    position: relative !important;
+                    outline: 2px solid #ff8800 !important;
+                    background-color: rgba(255, 200, 0, 0.2) !important;
+                    cursor: pointer !important;
+                }
+            `;
+                document.head.appendChild(highlightStylesheet);
+            }
+
+            const elementsWithAriaLabel = Array.from(document.querySelectorAll('[aria-label]'))
+                .filter((element) => !element.closest('header, footer')); // Skip elements inside header and footer
+
+            elementsWithAriaLabel.forEach((element) => {
+                if (!element.classList.contains('highlighted-aria-label')) {
+                    element.classList.add('highlighted-aria-label');
+                }
+            });
+
+            console.log(`${elementsWithAriaLabel.length} elements with aria-label were highlighted, excluding header and footer.`);
+        })();
+
+        (function () {
+            const inlineLabels = document.querySelectorAll('.inline-aria-label');
+            if (inlineLabels.length > 0) {
+                inlineLabels.forEach((label) => label.remove());
+                console.log('Removed inline labels.');
+                return;
+            }
+            const inlineStylesheetId = 'inline-aria-label-style';
+            if (!document.getElementById(inlineStylesheetId)) {
+                const inlineStylesheet = document.createElement('style');
+                inlineStylesheet.id = inlineStylesheetId;
+                inlineStylesheet.textContent = `
+                    .inline-aria-label {
+                        display: none !important;
+                        position: relative !important;
+                        background: #333 !important;
+                        color: #fff !important;
+                        padding: 4px 8px !important;
+                        border-radius: 4px !important;
+                        font-size: 12px !important;
+                        white-space: nowrap !important;
+                        z-index: 10000 !important;
+                    }
+                    .inline-label-container:hover .inline-aria-label {
+                        display: block !important;
+                    }
+                    .inline-label-container {
+                        position: relative !important;
+                    }
+                `;
+                document.head.appendChild(inlineStylesheet);
+            }
+            const elementsWithAriaLabel = Array.from(document.querySelectorAll('[aria-label]'))
+                .filter((element) => !element.closest('header, footer')); // Skip elements inside header and footer
+
+            elementsWithAriaLabel.forEach((element) => {
+                if (element.querySelector('.inline-aria-label')) return;
+                const labelContainer = document.createElement('div');
+                labelContainer.className = 'inline-label-container';
+                element.parentNode.insertBefore(labelContainer, element);
+                labelContainer.appendChild(element);
+                const inlineLabelElement = document.createElement('div');
+                inlineLabelElement.className = 'inline-aria-label';
+                inlineLabelElement.textContent = element.getAttribute('aria-label');
+                labelContainer.appendChild(inlineLabelElement);
+            });
+            console.log(`${elementsWithAriaLabel.length} elements with aria-label were labeled inline.`);
+        })();
+    };
+
+    // Show always Tooltips (Skip Header/Footer)
+    document.getElementById('always-show-inline-labels-skip').onclick = function () {
+        disableAllButtonsExceptRemove();
+        // Highlight elements with aria-label
+        (function () {
+            const highlightedElements = document.querySelectorAll('.highlighted-aria-label');
+            if (highlightedElements.length > 0) {
+                highlightedElements.forEach((element) => element.classList.remove('highlighted-aria-label'));
+                console.log('Removed existing highlights.');
+                return;
+            }
+
+            const highlightStylesheetId = 'highlight-aria-label-style';
+            if (!document.getElementById(highlightStylesheetId)) {
+                const highlightStylesheet = document.createElement('style');
+                highlightStylesheet.id = highlightStylesheetId;
+                highlightStylesheet.textContent = `
+        .highlighted-aria-label {
+            position: relative !important;
+            outline: 2px solid #ff8800 !important;
+            background-color: rgba(255, 200, 0, 0.2) !important;
+            cursor: pointer !important;
+        }
+    `;
+                document.head.appendChild(highlightStylesheet);
+            }
+
+            const elementsWithAriaLabel = Array.from(document.querySelectorAll('[aria-label]'))
+                .filter((element) => !element.closest('header, footer')); // Skip elements inside header and footer
+
+            elementsWithAriaLabel.forEach((element) => {
+                if (!element.classList.contains('highlighted-aria-label')) {
+                    element.classList.add('highlighted-aria-label');
+                }
+            });
+
+            console.log(`${elementsWithAriaLabel.length} elements with aria-label were highlighted, excluding header and footer.`);
+        })();
+
+        const elementsWithAriaLabel = Array.from(document.querySelectorAll('[aria-label]'))
+            .filter((element) => !element.closest('header, footer')); // Skip elements inside header and footer
+
+        // Remove existing inline tooltips
+        document.querySelectorAll('.inline-aria-label').forEach((tooltip) => {
+            tooltip.remove();
+        });
+
+        // Add inline tooltips to filtered elements
+        elementsWithAriaLabel.forEach((element) => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'inline-aria-label';
+            tooltip.textContent = element.getAttribute('aria-label');
+            element.appendChild(tooltip);
+        });
+
+        console.log(`${filteredElements.length} tooltips added for aria-label elements, excluding header/footer.`);
+    };
+
+    document.getElementById('inline-image-labels-skip').onclick = function () {
+        {
+            disableAllButtonsExceptRemove();
+
+            // Add inline labels
+            (function () {
+                // Remove existing inline labels if present
+                const inlineLabels = document.querySelectorAll('.inline-image-label');
+                if (inlineLabels.length > 0) {
+                    inlineLabels.forEach((label) => label.remove());
+                    console.log('Removed existing inline labels.');
+                    return;
+                }
+
+                // Add inline styles if not already present
+                const inlineStylesheetId = 'inline-image-style';
+                if (!document.getElementById(inlineStylesheetId)) {
+                    const inlineStylesheet = document.createElement('style');
+                    inlineStylesheet.id = inlineStylesheetId;
+                    inlineStylesheet.textContent = `
+                    .inline-image-label {
                         display: inline-block !important;
-                        background: #ffc107  !important;
+                        background: #ffc107 !important;
                         color: #fff !important;
                         padding: 4px 8px !important;
                         border-radius: 6px !important;
@@ -882,63 +1026,307 @@ javascript: (function () {
                         z-index: 10000 !important;
                     }
                 `;
-                document.head.appendChild(altTextStylesheet);
+                    document.head.appendChild(inlineStylesheet);
+                }
+                const images = Array.from(document.querySelectorAll('img, picture'))
+                    .filter((element) => !element.closest('header, footer')); // Skip elements inside header and footer
+
+                images.forEach((image) => {
+                    if (image.querySelector('.inline-image-label')) return;
+
+                    // Determine inline label content
+                    let labelContent = '';
+                    if (image.tagName.toLowerCase() === 'img') {
+                        const src = image.src || 'unknown';
+                        const ext = src.split('.').pop().split('?')[0].toLowerCase();
+                        labelContent = `Image: ${ext || 'unknown'}`;
+                    } else if (image.tagName.toLowerCase() === 'picture') {
+                        const sources = Array.from(image.querySelectorAll('source'));
+                        const fallback = image.querySelector('img');
+                        const types = sources.map((src) => src.type || 'unknown');
+                        const fallbackType = fallback ? fallback.src.split('.').pop().split('?')[0].toLowerCase() : 'none';
+                        labelContent = `Picture with fallbacks: ${types.join(', ')}; Fallback: ${fallbackType}`;
+                    }
+
+                    // Add inline label
+                    const label = document.createElement('span');
+                    label.className = 'inline-image-label';
+                    label.textContent = labelContent;
+                    image.parentNode.insertBefore(label, image.nextSibling);
+                });
+
+                console.log(`${images.length} images and picture tags labeled inline.`);
+            })();
+        }
+    };
+
+    document.getElementById('form-aria-checker').onclick = function () {
+        // Inject styles for highlights and tooltips
+        const formCheckerStylesheetId = 'form-checker-style';
+        if (!document.getElementById(formCheckerStylesheetId)) {
+            const formCheckerStylesheet = document.createElement('style');
+            formCheckerStylesheet.id = formCheckerStylesheetId;
+            formCheckerStylesheet.textContent = `
+                .form-check-highlight {
+                    position: relative;
+                    outline: 2px solid red;
+                    background-color: rgba(255, 0, 0, 0.1);
+                }
+    
+                .form-check-valid {
+                    position: relative;
+                    outline: 2px solid green;
+                    background-color: rgba(0, 255, 0, 0.1);
+                }
+    
+                .form-check-tooltip {
+                    position: absolute;
+                    top: -30px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #333;
+                    color: #fff;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    z-index: 1000;
+                    white-space: nowrap;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    opacity: 1;
+                    transition: opacity 0.2s ease, visibility 0.2s ease;
+                }
+            `;
+            document.head.appendChild(formCheckerStylesheet);
+        }
+
+        // Check all input, textarea, select, and fieldset elements within forms
+        document.querySelectorAll('form input, form textarea, form select, form fieldset').forEach((element) => {
+            // Remove existing highlights and tooltips
+            element.classList.remove('form-check-highlight', 'form-check-valid');
+            const existingTooltip = element.parentNode.querySelector('.form-check-tooltip');
+            if (existingTooltip) existingTooltip.remove();
+
+            // Skip elements with aria-hidden="true"
+            if (element.getAttribute('aria-hidden') === 'true') {
+                return;
             }
 
-            // Find images
-            const images = document.querySelectorAll('img');
-            images.forEach((image) => {
-                if (image.querySelector('.alt-text-label')) return;
+            let tooltipMessage = '';
+            let isValid = true;
 
-                // Determine alt text content
-                const altText = image.getAttribute('alt') || 'No alt text';
+            // Check for aria-labelledby
+            const labelledBy = element.getAttribute('aria-labelledby');
+            if (labelledBy) {
+                const ids = labelledBy.trim().split(/\s+/); // Split by whitespace
+                let hasValidId = false;
 
-                // Create label for alt text
-                const altLabel = document.createElement('span');
-                altLabel.className = 'alt-text-label';
-                altLabel.textContent = `Alt: ${altText}`;
+                ids.forEach((id) => {
+                    const labelElement = document.getElementById(id);
+                    if (labelElement) {
+                        hasValidId = true;
+                        tooltipMessage += `aria-labelledby "${id}": "${labelElement.textContent.trim() || 'No visible text'}". `;
+                    } else {
+                        tooltipMessage += `Invalid aria-labelledby ID: "${id}". `;
+                    }
+                });
 
-                // Add label next to the image
-                image.parentNode.insertBefore(altLabel, image.nextSibling);
-            });
+                if (!hasValidId) {
+                    isValid = false;
+                }
+            }
 
-            console.log(`${images.length} images labeled with alt text.`);
-        })();
-    };
+            // Check for aria-label
+            const ariaLabel = element.getAttribute('aria-label');
+            if (ariaLabel !== null) {
+                if (!ariaLabel.trim() || ariaLabel.trim().length < 3) {
+                    tooltipMessage += 'aria-label is empty or not meaningful. ';
+                    isValid = false;
+                } else {
+                    tooltipMessage += `aria-label: "${ariaLabel.trim()}". `;
+                }
+            }
 
-    // remove from header and footer
-    const hideHeaderFooterChanges = (className) => {
-        document.querySelectorAll('header, footer').forEach((element) => {
-            element.querySelectorAll(`.${className}`).forEach((child) => {
-                child.remove();
-            });
+            // Highlight element and add tooltip
+            if (!isValid) {
+                element.classList.add('form-check-highlight');
+
+                // Create a tooltip for invalid elements
+                const tooltip = document.createElement('div');
+                tooltip.className = 'form-check-tooltip';
+                tooltip.textContent = tooltipMessage.trim();
+                element.parentNode.style.position = 'relative'; // Ensure the parent has position
+                element.parentNode.appendChild(tooltip);
+            } else {
+                // Mark valid elements
+                element.classList.add('form-check-valid');
+
+                // Create a tooltip for valid elements
+                const tooltip = document.createElement('div');
+                tooltip.className = 'form-check-tooltip';
+                tooltip.textContent = `Accessible element: ${tooltipMessage.trim()}`;
+                element.parentNode.style.position = 'relative'; // Ensure the parent has position
+                element.parentNode.appendChild(tooltip);
+            }
         });
+
+        console.log('Form accessibility issues have been checked.');
     };
 
-    // Updated duplicate buttons with simplified skip logic
+    document.getElementById('show-alt-text').onclick = function () {
+        // Inject styles for alt-text labels
+        const altTextStylesheetId = 'alt-text-style';
+        if (!document.getElementById(altTextStylesheetId)) {
+            const altTextStylesheet = document.createElement('style');
+            altTextStylesheet.id = altTextStylesheetId;
+            altTextStylesheet.textContent = `
+                .alt-text-label {
+                    display: inline-block !important; 
+            background: #ff8800 !important;
+            color: #fff !important;
+            padding: 6px 10px !important;
+            border-radius: 12px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            margin-left: 6px !important;
+            z-index: 10000 !important;
+            transition: background 0.3s ease-in-out !important;
+            position: relative !important;
+                }
+                .highlighted-media {
+                    outline: 3px solid #007bff !important;
+                    background-color: rgba(0, 123, 255, 0.1) !important;
+                }
+            `;
+            document.head.appendChild(altTextStylesheet);
+        }
 
-    document.getElementById('highlight-and-inline-labels-skip').onclick = function () {
-        document.getElementById('highlight-and-inline-labels').click(); // Run the existing function
-        hideHeaderFooterChanges('highlighted-aria-label'); // Remove highlights in header/footer
-        console.log('Highlighted aria-labels (skipping header and footer).');
-    };
+        // Function to find accessible text
+        const findAccessibleText = (element) => {
+            const alt = element.getAttribute('alt');
+            const ariaLabel = element.getAttribute('aria-label');
+            const labelledById = element.getAttribute('aria-labelledby');
+            const labelledByElement = labelledById ? document.getElementById(labelledById) : null;
 
-    document.getElementById('always-show-inline-labels-skip').onclick = function () {
-        document.getElementById('always-show-inline-labels').click(); // Run the existing function
-        hideHeaderFooterChanges('inline-aria-label'); // Remove tooltips in header/footer
-        console.log('Displayed tooltips for aria-labels (skipping header and footer).');
-    };
+            if (alt) return `Alt: "${alt}"`;
+            if (ariaLabel) return `Aria-label: "${ariaLabel}"`;
+            if (labelledByElement) return `Aria-labelledby: "${labelledByElement.textContent.trim()}"`;
+            return null;
+        };
 
-    document.getElementById('inline-image-labels-skip').onclick = function () {
-        document.getElementById('inline-image-labels').click(); // Run the existing function
-        hideHeaderFooterChanges('inline-image-label'); // Remove inline image labels in header/footer
-        console.log('Displayed image formats (skipping header and footer).');
+        // Function to find parent accessible text
+        const findParentAccessibleText = (element) => {
+            let parent = element.parentElement;
+            while (parent) {
+                const accessibleText = findAccessibleText(parent);
+                if (accessibleText) return accessibleText;
+                parent = parent.parentElement;
+            }
+            return 'No accessible text found.';
+        };
+
+        // Highlight and label elements
+        const elements = document.querySelectorAll('img, picture, svg');
+        elements.forEach((element) => {
+            element.classList.add('highlighted-media');
+
+            // Remove existing labels
+            const existingLabel = element.querySelector('.alt-text-label');
+            if (existingLabel) existingLabel.remove();
+
+            // Find accessible text
+            let accessibleText = findAccessibleText(element);
+            if (!accessibleText) {
+                accessibleText = findParentAccessibleText(element);
+            }
+
+            // Add label
+            const label = document.createElement('span');
+            label.className = 'alt-text-label';
+            label.textContent = accessibleText;
+            element.style.position = 'relative';
+            element.parentNode.insertBefore(label, element.nextSibling);
+        });
+
+        console.log(`${elements.length} media elements labeled with accessible text.`);
     };
 
     document.getElementById('show-alt-text-skip').onclick = function () {
-        document.getElementById('show-alt-text').click(); // Run the existing function
-        hideHeaderFooterChanges('alt-text-label'); // Remove alt text labels in header/footer
-        console.log('Displayed alt text for images (skipping header and footer).');
+        // Inject styles for alt-text labels
+        const altTextStylesheetId = 'alt-text-style';
+        if (!document.getElementById(altTextStylesheetId)) {
+            const altTextStylesheet = document.createElement('style');
+            altTextStylesheet.id = altTextStylesheetId;
+            altTextStylesheet.textContent = `
+                .alt-text-label {
+                    display: inline-block !important; 
+            background: #ff8800 !important;
+            color: #fff !important;
+            padding: 6px 10px !important;
+            border-radius: 12px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            margin-left: 6px !important;
+            z-index: 10000 !important;
+            transition: background 0.3s ease-in-out !important;
+            position: relative !important;
+                }
+                .highlighted-media {
+                    outline: 3px solid #007bff !important;
+                    background-color: rgba(0, 123, 255, 0.1) !important;
+                }
+            `;
+            document.head.appendChild(altTextStylesheet);
+        }
+
+        // Function to find accessible text
+        const findAccessibleText = (element) => {
+            const alt = element.getAttribute('alt');
+            const ariaLabel = element.getAttribute('aria-label');
+            const labelledById = element.getAttribute('aria-labelledby');
+            const labelledByElement = labelledById ? document.getElementById(labelledById) : null;
+
+            if (alt) return `Alt: "${alt}"`;
+            if (ariaLabel) return `Aria-label: "${ariaLabel}"`;
+            if (labelledByElement) return `Aria-labelledby: "${labelledByElement.textContent.trim()}"`;
+            return null;
+        };
+
+        // Function to find parent accessible text
+        const findParentAccessibleText = (element) => {
+            let parent = element.parentElement;
+            while (parent) {
+                const accessibleText = findAccessibleText(parent);
+                if (accessibleText) return accessibleText;
+                parent = parent.parentElement;
+            }
+            return 'No accessible text found.';
+        };
+
+        // Highlight and label elements
+        const elements = Array.from(document.querySelectorAll('img, picture, svg'))
+            .filter((element) => !element.closest('header, footer'));
+        elements.forEach((element) => {
+            element.classList.add('highlighted-media');
+
+            // Remove existing labels
+            const existingLabel = element.querySelector('.alt-text-label');
+            if (existingLabel) existingLabel.remove();
+
+            // Find accessible text
+            let accessibleText = findAccessibleText(element);
+            if (!accessibleText) {
+                accessibleText = findParentAccessibleText(element);
+            }
+
+            // Add label
+            const label = document.createElement('span');
+            label.className = 'alt-text-label';
+            label.textContent = accessibleText;
+            element.style.position = 'relative';
+            element.parentNode.insertBefore(label, element.nextSibling);
+        });
+
+        console.log(`${elements.length} media elements labeled with accessible text.`);
     };
 
 })();
