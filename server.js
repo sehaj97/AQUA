@@ -3,6 +3,7 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import chromium from '@sparticuz/chromium';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 puppeteer.use(StealthPlugin());
@@ -12,19 +13,8 @@ app.use(json());
 app.use(express.static('.'));
 
 // Function to analyze a single URL
-async function analyzeUrl(url) {
+async function analyzeUrl(browser, url) {
     try {
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--ignore-certificate-errors',
-                '--ignore-certificate-errors-spki-list',
-                '--disable-gpu',
-                '--disable-dev-shm-usage',
-            ],
-        });
         const page = await browser.newPage();
 
         await page.setUserAgent(
@@ -66,7 +56,6 @@ async function analyzeUrl(url) {
                 shadowDom: false,
             });
         });
-        await browser.close();
         return { url, violations: results.violations };
     } catch (error) {
         console.error(`Error during analysis of ${url}:`, error);
@@ -74,21 +63,28 @@ async function analyzeUrl(url) {
     }
 }
 
-// Split URLs into smaller chunks
-function chunkArray(array, chunkSize) {
-    const results = [];
-    while (array.length) {
-        results.push(array.splice(0, chunkSize));
-    }
-    return results;
-}
-
 async function analyzeMultipleUrls(urls) {
-    const urlChunks = chunkArray(urls, 5); // Adjust chunk size as needed
+
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--ignore-certificate-errors',
+            '--ignore-certificate-errors-spki-list',
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+        ],
+    });
+
     const results = [];
-    for (const chunk of urlChunks) {
-        const chunkResults = await Promise.all(chunk.map(analyzeUrl));
-        results.push(...chunkResults);
+    try {
+        for (const url of urls) {
+            const result = await analyzeUrl(browser, url);
+            results.push(result);
+        }
+    } finally {
+        await browser.close();
     }
     return results;
 }

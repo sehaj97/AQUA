@@ -43,7 +43,7 @@ ARG provides accessibility reports for URLs in an organized format with interact
 3. **Run the application**:
 
    ```bash
-   npm run dev
+   npm run start
    ```
 
 The application will start on `http://localhost:3000` by default.
