@@ -66,9 +66,16 @@ async function analyzeUrl(browser, url) {
 async function analyzeMultipleUrls(urls) {
 
     const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/app/.apt/usr/bin/google-chrome'
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--ignore-certificate-errors',
+            '--ignore-certificate-errors-spki-list',
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+        ],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/app/.chrome-for-testing/chrome-linux64/chrome',
+        headless: 'new'
     });
 
     const results = [];
