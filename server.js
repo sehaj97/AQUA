@@ -16,6 +16,10 @@ app.use(express.static('.'));
 async function analyzeUrl(browser, url) {
     try {
         const page = await browser.newPage();
+        await page.setGeolocation({
+            latitude: 43.6532, // Toronto coordinates
+            longitude: -79.3832
+        });
 
         await page.setUserAgent(
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
@@ -75,7 +79,7 @@ async function analyzeMultipleUrls(urls) {
             '--disable-dev-shm-usage',
         ],
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/app/.chrome-for-testing/chrome-linux64/chrome',
-        headless: 'new'
+        headless: true
     });
 
     const results = [];
