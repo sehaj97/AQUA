@@ -66,11 +66,9 @@ async function analyzeUrl(browser, url) {
 async function analyzeMultipleUrls(urls) {
 
     const browser = await puppeteer.launch({
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-        ],
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const results = [];
