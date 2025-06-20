@@ -55,8 +55,8 @@ javascript: (function () {
     const popupHost = document.createElement('div');
     popupHost.id = 'aqua-popup';
     popupHost.style.position = 'fixed';
-    popupHost.style.top = '100px';
-    popupHost.style.left = '50%';
+    popupHost.style.top = '20px';
+    popupHost.style.left = '20px';
     popupHost.style.transform = 'translateX(-50%)';
     popupHost.style.zIndex = '100001';
     popupHost.style.cursor = ''; // Remove move cursor from whole popup
