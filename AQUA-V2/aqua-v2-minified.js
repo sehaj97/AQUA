@@ -166,7 +166,7 @@ const popupElement=document.createElement('div');popupElement.id='aqua-popup';po
     <button class="close-button" id="close-popup">&times;</button>
     <h3>AQUA</h3>
     <p>
-    <sub>Version 2</sub></p>
+    <sub>Version 2.1</sub></p>
     <p><strong>Accessibility Quality User-first Assurance</strong> (AQUA). You can select a tool:
       <select id="aqua-tool-dropdown" style="margin-left: 8px; padding: 4px 8px; border-radius: 4px; width:80%;">
         <option value="COAQUA">CO-Aqua - Content Only AQUA</option>
