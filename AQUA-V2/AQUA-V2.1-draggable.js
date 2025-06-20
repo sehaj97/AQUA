@@ -214,13 +214,14 @@ javascript: (function () {
     popupElement.style.left = '50%';
     popupElement.style.transform = 'translateX(-50%)';
     popupElement.style.zIndex = '100001';
-    popupElement.style.cursor = 'move'; // show move cursor on hover
+    popupElement.style.cursor = ''; // Remove move cursor from whole popup
 
-    // Add a draggable header
+    // Add a draggable header with a drag button on the top left
     popupElement.innerHTML = `
-    <div id="aqua-popup-header" style="cursor: move; user-select: none; padding: 8px 0 0 0;">
+    <div id="aqua-popup-header" style="user-select: none; padding: 8px 0 0 0; display: flex; align-items: center;">
+      <button id="aqua-drag-btn" title="Drag AQUA popup" style="width: 20px !important;height: 20px !important;cursor: move!important;border-radius: 50% !important;position: absolute;top: 10px !important;background: linear-gradient(135deg, yellow, orange) !important;">&curren;</button>
+      <h3 style="margin:0; padding:0 12px; flex:1;">AQUA</h3>
       <button class="close-button" id="close-popup" style="float:right;">&times;</button>
-      <h3 style="margin:0; padding:0 12px;">AQUA</h3>
     </div>
     <p>
     <sub>Version 2.1</sub></p>
@@ -284,84 +285,87 @@ javascript: (function () {
     </div>
     `;
 
-    // --- Make popup draggable ---
-    (function makeDraggable(popup, headerSelector) {
-      let isDragging = false, startX, startY, startLeft, startTop;
+    // --- Make popup draggable by holding the drag button only ---
+    (function makeDraggable(popup, dragBtnSelector) {
+        let isDragging = false, startX, startY, startLeft, startTop;
 
-      const header = popup.querySelector(headerSelector) || popup;
-      header.style.cursor = 'move';
+        const dragBtn = popup.querySelector(dragBtnSelector);
+        if (dragBtn) {
+            dragBtn.style.cursor = 'move';
 
-      function onMouseDown(e) {
-        if (e.button !== 0) return; // Only left mouse
-        isDragging = true;
-        // Remove transform for accurate positioning
-        popup.style.transform = '';
-        startX = e.clientX;
-        startY = e.clientY;
-        // Get current position
-        const rect = popup.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        e.preventDefault();
-      }
-      function onMouseMove(e) {
-        if (!isDragging) return;
-        let newLeft = startLeft + (e.clientX - startX);
-        let newTop = startTop + (e.clientY - startY);
+            function onMouseDown(e) {
+                if (e.button !== 0) return; // Only left mouse
+                isDragging = true;
+                // Remove transform for accurate positioning
+                popup.style.transform = '';
+                startX = e.clientX;
+                startY = e.clientY;
+                // Get current position
+                const rect = popup.getBoundingClientRect();
+                startLeft = rect.left;
+                startTop = rect.top;
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                e.preventDefault();
+            }
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                let newLeft = startLeft + (e.clientX - startX);
+                let newTop = startTop + (e.clientY - startY);
 
-        // Keep within viewport
-        const minLeft = 0, minTop = 0;
-        const maxLeft = window.innerWidth - popup.offsetWidth;
-        const maxTop = window.innerHeight - popup.offsetHeight;
-        newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
-        newTop = Math.max(minTop, Math.min(newTop, maxTop));
+                // Keep within viewport
+                const minLeft = 0, minTop = 0;
+                const maxLeft = window.innerWidth - popup.offsetWidth;
+                const maxTop = window.innerHeight - popup.offsetHeight;
+                newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
+                newTop = Math.max(minTop, Math.min(newTop, maxTop));
 
-        popup.style.left = newLeft + 'px';
-        popup.style.top = newTop + 'px';
-      }
-      function onMouseUp() {
-        isDragging = false;
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-      }
-      header.addEventListener('mousedown', onMouseDown);
-      // Touch support
-      header.addEventListener('touchstart', function(e) {
-        if (e.touches.length !== 1) return;
-        isDragging = true;
-        popup.style.transform = '';
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        const rect = popup.getBoundingClientRect();
-        startLeft = rect.left;
-        startTop = rect.top;
-        document.addEventListener('touchmove', onTouchMove, {passive: false});
-        document.addEventListener('touchend', onTouchEnd);
-      });
-      function onTouchMove(e) {
-        if (!isDragging || e.touches.length !== 1) return;
-        let newLeft = startLeft + (e.touches[0].clientX - startX);
-        let newTop = startTop + (e.touches[0].clientY - startY);
+                popup.style.left = newLeft + 'px';
+                popup.style.top = newTop + 'px';
+            }
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            dragBtn.addEventListener('mousedown', onMouseDown);
 
-        // Keep within viewport
-        const minLeft = 0, minTop = 0;
-        const maxLeft = window.innerWidth - popup.offsetWidth;
-        const maxTop = window.innerHeight - popup.offsetHeight;
-        newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
-        newTop = Math.max(minTop, Math.min(newTop, maxTop));
+            // Touch support
+            dragBtn.addEventListener('touchstart', function (e) {
+                if (e.touches.length !== 1) return;
+                isDragging = true;
+                popup.style.transform = '';
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                const rect = popup.getBoundingClientRect();
+                startLeft = rect.left;
+                startTop = rect.top;
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            });
+            function onTouchMove(e) {
+                if (!isDragging || e.touches.length !== 1) return;
+                let newLeft = startLeft + (e.touches[0].clientX - startX);
+                let newTop = startTop + (e.touches[0].clientY - startY);
 
-        popup.style.left = newLeft + 'px';
-        popup.style.top = newTop + 'px';
-        e.preventDefault();
-      }
-      function onTouchEnd() {
-        isDragging = false;
-        document.removeEventListener('touchmove', onTouchMove);
-        document.removeEventListener('touchend', onTouchEnd);
-      }
-    })(popupElement, '#aqua-popup-header');
+                // Keep within viewport
+                const minLeft = 0, minTop = 0;
+                const maxLeft = window.innerWidth - popup.offsetWidth;
+                const maxTop = window.innerHeight - popup.offsetHeight;
+                newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
+                newTop = Math.max(minTop, Math.min(newTop, maxTop));
+
+                popup.style.left = newLeft + 'px';
+                popup.style.top = newTop + 'px';
+                e.preventDefault();
+            }
+            function onTouchEnd() {
+                isDragging = false;
+                document.removeEventListener('touchmove', onTouchMove);
+                document.removeEventListener('touchend', onTouchEnd);
+            }
+        }
+    })(popupElement, '#aqua-drag-btn');
 
     // Show only the section for the selected tool
     function showAquaToolSection(selected) {
