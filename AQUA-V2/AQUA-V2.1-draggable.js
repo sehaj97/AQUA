@@ -225,9 +225,9 @@ javascript: (function () {
     popupElement.id = 'aqua-popup-main';
     popupElement.innerHTML = `
     <div id="aqua-popup-header" style="user-select: none; padding: 8px 0 0 0; display: flex; align-items: center;">
-      <button id="aqua-drag-btn" title="Drag AQUA popup" style="position: absolute;width: 40px !important;height: 40px !important;font-size: 30px!important;cursor: crosshair !important;border-radius: 50% !important;top: 10px !important;padding: 0px !important;background: linear-gradient(135deg, yellow, orange) !important;">&curren;</button>
+      <button id="aqua-drag-btn" title="Drag AQUA popup" style="position: absolute;width: 40px !important;height: 40px !important;font-size: 30px!important;cursor: move !important;border-radius: 50% !important;top: 10px !important;padding: 0px !important;background: linear-gradient(135deg, yellow, orange) !important;">&curren;</button>
       <h3 style="margin:0; padding:0 12px; flex:1;">AQUA</h3>
-      <button class="close-button" id="close-popup" style="float:right;position: absolute;width: 40px !important;height: 40px !important;font-size: 30px!important;cursor: move !important;border-radius: 50% !important;top: 10px !important;padding: 0px !important;">&times;</button>
+      <button class="close-button" id="close-popup" style="float:right;position: absolute;width: 40px !important;height: 40px !important;font-size: 30px!important;cursor: pointer !important;border-radius: 50% !important;top: 10px !important;padding: 0px !important;">&times;</button>
     </div>
     <p>
     <sub>Version 2.1</sub></p>
