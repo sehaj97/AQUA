@@ -7,7 +7,7 @@ return elements}
 const AQUA_DISABLED_KEY='__AQUA_BUTTONS_DISABLED__';function saveButtonsDisabledState(isDisabled){try{localStorage.setItem(AQUA_DISABLED_KEY,isDisabled?'1':'0')}catch(e){}}
 function getButtonsDisabledState(){try{return localStorage.getItem(AQUA_DISABLED_KEY)==='1'}catch(e){return!1}}
 const existingPopup=document.getElementById('aqua-popup');if(existingPopup){existingPopup.remove();console.log('Removed existing popup.');return}
-const popupHost=document.createElement('div');popupHost.id='aqua-popup';popupHost.style.position='fixed';popupHost.style.top='100px';popupHost.style.left='50%';popupHost.style.transform='translateX(-50%)';popupHost.style.zIndex='100001';popupHost.style.cursor='';const shadow=popupHost.attachShadow({mode:'open'});const style=document.createElement('style');style.textContent=`
+const popupHost=document.createElement('div');popupHost.id='aqua-popup';popupHost.style.position='fixed';popupHost.style.top='20px';popupHost.style.left='20px';popupHost.style.transform='translateX(-50%)';popupHost.style.zIndex='100001';popupHost.style.cursor='';const shadow=popupHost.attachShadow({mode:'open'});const style=document.createElement('style');style.textContent=`
     #aqua-popup-main {
       position: fixed !important;
       background: linear-gradient(135deg, #1d1d1d, #333) !important;
