@@ -272,10 +272,6 @@ javascript: (function () {
         visibility: visible;
         opacity: 1;
       }
-      .aqua-btn-tooltip-container .aqua-tooltip-hide .aqua-btn-tooltip {
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
     </style>
     <div id="aqua-popup-two-header" style="user-select: none; padding: 8px 0 0 0; display: flex; align-items: center;">
       <span class="aqua-btn-tooltip-container">
@@ -337,29 +333,28 @@ javascript: (function () {
       ">CO-AQUA</h3>
         <div>
           <span class="aqua-btn-tooltip-container">
-            <button id="co-highlight-and-inline-labels-skip">Highlight Aria-labels with tooltips on hover (Skip Header/Footer)</button>
-            <span class="aqua-btn-tooltip"Best for checking an update to part of the page</span>
+            <button id="co-highlight-and-inline-labels-skip">Highlight Aria-labels</button>
+            <span class="aqua-btn-tooltip">Highlight elements with <b>aria-label</b> (skipping header/footer). Value shown in tooltip on hover.</span>
           </span>
           <span class="aqua-btn-tooltip-container">
-            <button id="co-always-show-inline-labels-skip">Show ALL Labels (Skip Header/Footer)</button>
-            <span class="aqua-btn-tooltip">Best for checking the entire page</span>
+            <button id="co-always-show-inline-labels-skip">Display ALL Aria-labels</button>
+            <span class="aqua-btn-tooltip">Show all <b>aria-label</b> values inline (skipping header/footer).</span>
           </span>
           <span class="aqua-btn-tooltip-container">
             <button id="co-show-alt-text-skip">Check Image Alt Text (Skip Header/Footer)</button>
-            <span class="aqua-btn-tooltip">Best for checking images</span>
+            <span class="aqua-btn-tooltip">Show <b>alt</b> text for images (skipping header/footer).</span>
           </span>
           <span class="aqua-btn-tooltip-container">
             <button id="co-form-aria-checker">form aria checks</button>
-            <span class="aqua-btn-tooltip">Best for checking form entry fields</span>
+            <span class="aqua-btn-tooltip">Check forms for <b>alt</b>, <b>aria-label</b>, and <b>aria-labelledby</b> attributes.</span>
           </span>
-          
           <span class="aqua-btn-tooltip-container">
             <button id="aqua-revert">Revert All AQUA Changes</button>
-            <span class="aqua-btn-tooltip">Clear all AQUA labels</span>
+            <span class="aqua-btn-tooltip">Remove all highlights and revert changes made by AQUA.</span>
           </span>
           <span class="aqua-btn-tooltip-container">
             <button id="remove-actions">Refresh(if revert caused issues)</button>
-            <span class="aqua-btn-tooltip">Reload/refresh the page if clear caused issues.</span>
+            <span class="aqua-btn-tooltip">Reload/refresh the page if revert caused issues.</span>
           </span>
         </div>
       </div>
@@ -509,37 +504,6 @@ javascript: (function () {
       </div>
     </div>
     `;
-
-    // --- Hide tooltip on button click ---
-    setTimeout(() => {
-        // Use shadowRoot if present, else popupElement itself
-        const root = popupElement.shadowRoot || popupElement;
-        // Find all tooltip containers with a button inside
-        const containers = popupElement.querySelectorAll('.aqua-btn-tooltip-container');
-        containers.forEach(container => {
-            const btn = container.querySelector('button');
-            if (btn) {
-                btn.addEventListener('mousedown', () => {
-                    // Add class to hide tooltip
-                    container.classList.add('aqua-tooltip-hide');
-                });
-                btn.addEventListener('mouseup', () => {
-                    // Remove class after short delay to allow click to finish
-                    setTimeout(() => {
-                        container.classList.remove('aqua-tooltip-hide');
-                    }, 150);
-                });
-                btn.addEventListener('mouseleave', () => {
-                    // Remove class if mouse leaves button before mouseup
-                    container.classList.remove('aqua-tooltip-hide');
-                });
-                btn.addEventListener('blur', () => {
-                    // Remove class on blur (keyboard navigation)
-                    container.classList.remove('aqua-tooltip-hide');
-                });
-            }
-        });
-    }, 0);
 
     // Add style and popup to shadow root
     shadow.appendChild(style);
